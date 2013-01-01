@@ -36,6 +36,6 @@ Useful links
 Maybe useful links
 ------------------
 These libraries were not selected due to license or incompatibilities or other reason:
--- http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-misc-419423.html
--- http://www.oracle.com/technetwork/java/index-139971.html
--- http://rxtx.qbang.org/wiki/index.php/Download
+- http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-misc-419423.html
+- http://www.oracle.com/technetwork/java/index-139971.html
+- http://rxtx.qbang.org/wiki/index.php/Download
