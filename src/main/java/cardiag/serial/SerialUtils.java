@@ -9,6 +9,7 @@ import java.util.List;
 
 import jssc.SerialPortList;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,4 +29,22 @@ public class SerialUtils {
     return Arrays.asList(portNames);
   }
 
+  /**
+   * @param line
+   * @return
+   */
+  public static boolean[] convertHexToBooleanArray(final String... line) {
+    LOG.debug("convertHexToBooleanArray(line={})", (Object) line);
+    final boolean[] bools = new boolean[line.length * 8];
+    int k = 0;
+    for (int i = 0; i < line.length; i++) {
+      String hex = line[i];
+      int val = Integer.parseInt(hex, 16);
+      String binary = StringUtils.leftPad(Integer.toBinaryString(val), 8, '0');
+      for (int j = 0; j < binary.length(); j++) {
+        bools[k++] = binary.charAt(j) == '1';
+      }
+    }
+    return bools;
+  }
 }

@@ -43,6 +43,7 @@ public class TestConfiguration {
   public PortConfiguration getPortConfiguration() {
     final PortConfiguration cfg = new PortConfiguration();
     cfg.setPortName(getPortName());
+    cfg.setCommandTimeout(10000L);
     return cfg;
   }
 

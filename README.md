@@ -2,7 +2,7 @@ java-cardiag
 ============
 
 Description
-------------
+-----------
 Car diagnostic software for vehicles with OBD2 compatible interface.
 
 Targets
@@ -19,7 +19,7 @@ Problems
 ---------
 - how
 - only available hardware for testing - ELM327 clone (1.5a)
-- only available car for testing - Lada Kalina 1.6 8V 2007.
+- only few available cars for testing - Lada Kalina 1.6 8V 2007, Škoda Fabia 2010, Ford Focus 2007.
 - need help with a selection of the license ... GNU GPL v3? EPL? BSD?
 
 Current stage
@@ -32,6 +32,9 @@ Useful links
 - http://en.wikipedia.org/wiki/OBD-II_PIDs#Bitwise_encoded_PIDs
 - http://www.obd-codes.com/trouble_codes/
 - http://www.obd-codes.com/faq/obd2-codes-explained.php
+- http://www.multitronics.ru/kody_vaz/
+- http://www.multitronics.ru/kody_obd2/
+- http://www.multitronics.ru/terminy_obd2/
 
 Maybe useful links
 ------------------

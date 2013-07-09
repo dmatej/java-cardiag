@@ -4,6 +4,13 @@
   <artifactId>java-cardiag</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>Car diagnostic software</name>
+  <url>https://github.com/dmatej/java-cardiag</url>
+
+  <scm>
+    <connection>scm:git:git://github.com/dmatej/java-cardiag.git</connection>
+    <developerConnection>git@github.com:dmatej/java-cardiag.git</developerConnection>
+    <url>https://github.com/dmatej/java-cardiag.git</url>
+  </scm>
 
   <pluginRepositories>
     <pluginRepository>

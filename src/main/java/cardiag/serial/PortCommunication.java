@@ -5,7 +5,6 @@ package cardiag.serial;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import jssc.SerialPort;
@@ -16,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Communication with the serial port device.
+ *
  * @author David Matějček
  */
 public class PortCommunication {
@@ -24,29 +25,54 @@ public class PortCommunication {
   private static final String RESPONSE_OK = "OK";
   private static final String RESPONSE_TERMINALCHAR = ">";
 
+  private final PortConfiguration cfg;
   private final SerialPort port;
 
 
-  public PortCommunication(final PortConfiguration cfg) throws SerialPortException {
+  /**
+   * @param cfg - a port configuration
+   * @throws PortCommunicationException - cannot initialize the communication.
+   */
+  public PortCommunication(final PortConfiguration cfg) throws PortCommunicationException {
     LOG.debug("PortCommunication(cfg={})", cfg);
-    this.port = new SerialPort(cfg.getPortName());
-    if (!this.port.openPort()) {
-      throw new IllegalStateException("Cannot open port!");
-    }
-    // see page 7 in elm327.pdf - do not change!
-    if (!this.port.setParams(38400, 8, 1, 0, true, true)) {
-      throw new IllegalStateException("Setting params was unsuccessful!");
+    try {
+      this.cfg = cfg;
+      this.port = new SerialPort(cfg.getPortName());
+      if (!this.port.openPort()) {
+        throw new PortCommunicationException("Cannot open port!");
+      }
+      // see page 7 in elm327.pdf - do not change!
+      if (!this.port.setParams(38400, 8, 1, 0, true, true)) {
+        throw new PortCommunicationException("Setting parameters was unsuccessful!");
+      }
+    } catch (SerialPortException e) {
+      throw new PortCommunicationException(e);
     }
   }
 
 
-  protected List<String> readResponse(final long maxTime) throws SerialPortException {
-    LOG.trace("readResponse(maxTime={})", maxTime);
+  /**
+   * Reads responses line by line from the buffer until {@value #RESPONSE_TERMINALCHAR} comes or
+   * timeout occurs.
+   *
+   * @return a list of lines in response, never null and never empty list.
+   * @throws PortCommunicationException - if there was no response or prompt was missing.
+   */
+  public List<String> readResponse() throws PortCommunicationException {
+    LOG.trace("readResponse()");
 
-    final StringBuilder buffer = new StringBuilder(256);
-    final long start = System.currentTimeMillis();
-    while (start + maxTime > System.currentTimeMillis()) {
-      if (this.port.getInputBufferBytesCount() > 0) {
+    try {
+      final StringBuilder buffer = new StringBuilder(256);
+      final long start = System.currentTimeMillis();
+      final long timeout = cfg.getCommandTimeout();
+      while (true) {
+        if (start + timeout < System.currentTimeMillis()) {
+          throw new PortCommunicationException(String.format("Timeout %dms occured.", timeout));
+        }
+        if (this.port.getInputBufferBytesCount() == 0) {
+          Thread.yield();
+          continue;
+        }
         final String string = this.port.readString();
         LOG.trace("response string={}", string);
         buffer.append(string).append('\r');
@@ -54,88 +80,113 @@ public class PortCommunication {
           buffer.setLength(buffer.length() - 2);
           break;
         }
-      } else {
-        sleep();
       }
-    }
-    final String response = buffer.toString();
-    if (response == null || response.trim().isEmpty()) {
-      return Collections.emptyList();
-    }
-    final String[] lines = StringUtils.split(response, '\r');
-    final List<String> responses = new ArrayList<String>(lines.length);
-    for (String line : lines) {
-      final String trimmed = StringUtils.trimToNull(line);
-      if (trimmed != null) {
-        responses.add(trimmed);
+      final String response = buffer.toString();
+      if (response == null || response.trim().isEmpty()) {
+        throw new PortCommunicationException("Retrieved no response from the port.");
       }
-    }
+      final String[] lines = StringUtils.split(response, '\r');
+      final List<String> responses = new ArrayList<String>(lines.length);
+      for (String line : lines) {
+        final String trimmed = StringUtils.trimToNull(line);
+        if (trimmed != null) {
+          responses.add(trimmed);
+        }
+      }
 
-    LOG.info("Received response: {}", responses);
-    return responses;
-  }
-
-
-  private void sleep() {
-    LOG.trace("sleep()");
-    try {
-      Thread.sleep(100);
-    } catch (InterruptedException e) {
-      // what to do?
+      LOG.info("Received response: {}", responses);
+      return responses;
+    } catch (SerialPortException e) {
+      throw new PortCommunicationException(e);
     }
   }
 
 
-  private void writeln(String... command) throws SerialPortException {
+  /**
+   * Writes command and arguments to the port.
+   *
+   * @param command - command and it's arguments.
+   * @throws PortCommunicationException
+   */
+  public void writeln(String... command) throws PortCommunicationException {
     LOG.debug("writeln(command={})", Arrays.toString(command));
-    for (String commandPart : command) {
-      this.port.writeString(commandPart);
+    try {
+      for (String commandPart : command) {
+        this.port.writeString(commandPart);
+      }
+      this.port.writeString("\r\n");
+    } catch (SerialPortException e) {
+      throw new PortCommunicationException(e);
     }
-    this.port.writeString("\r\n");
   }
 
-  private String translate(final boolean value) throws SerialPortException {
+
+  /**
+   * @param value
+   * @return 1 for true, 0 for false.
+   * @throws PortCommunicationException
+   */
+  protected final String translate(final boolean value) throws PortCommunicationException {
     LOG.trace("translate(value={})", value);
     return value ? "1" : "0";
   }
 
-  private void checkOkResponse() throws SerialPortException, CommunicationException {
+
+  /**
+   * Checks for OK in port response.
+   *
+   * @throws PortCommunicationException
+   */
+  protected void checkOkResponse() throws PortCommunicationException {
     LOG.trace("checkOkResponse()");
-    final List<String> response = readResponse(1000);
-    // FIXME: not nice ... we should know exactly ...
-    if (!RESPONSE_OK.equalsIgnoreCase(response.get(0)) && !RESPONSE_OK.equalsIgnoreCase(response.get(1))) {
-      throw new CommunicationException("Command unsuccessful! Response: " + response);
+    final List<String> response = readResponse();
+    if (response == null || response.isEmpty()) {
+      throw new PortCommunicationException("No response.");
+    }
+    final int resultCodeIndex = response.size() - 1;
+    if (!RESPONSE_OK.equalsIgnoreCase(response.get(resultCodeIndex))) {
+      throw new PortCommunicationException("Command unsuccessful! Response: " + response);
     }
   }
 
 
-  public String at(final String command) throws SerialPortException {
+  /**
+   * Executes an AT command and returns an answer.
+   *
+   * @param command - an AT command to execute.
+   * @return an answer of the command.
+   * @throws PortCommunicationException
+   */
+  public String at(final String command) throws PortCommunicationException {
     LOG.info("at(command={})", command);
     writeln("AT", command);
-    return readResponse(1000).get(0);
+    return readResponse().get(0);
   }
 
 
-  public void reset() throws SerialPortException, CommunicationException {
+  /**
+   *
+   * @throws PortCommunicationException
+   */
+  public void reset() throws PortCommunicationException {
     LOG.debug("reset()");
-    writeln("ATZ");
-    final List<String> response = readResponse(20000);
+    final String response = at("Z");
     // with echo on the first line will be ATZ (sent command)
     // another line will be a device type identification.
-    if (response.isEmpty()) {
-      throw new CommunicationException("Command unsuccessful! Response: " + response);
+    if (response == null) {
+      throw new PortCommunicationException("Command unsuccessful! Response: " + response);
     }
   }
 
 
-  public void setEcho(final boolean on) throws SerialPortException, CommunicationException {
+  public void setEcho(final boolean on) throws PortCommunicationException {
     LOG.debug("setEcho(on={})", on);
     writeln("ATE", translate(on));
     checkOkResponse();
   }
 
 
-  public void setLineTermination(final boolean on) throws SerialPortException, CommunicationException {
+  public void setLineTermination(final boolean on) throws PortCommunicationException {
     LOG.debug("setLineTermination(on={})", on);
     writeln("ATL", translate(on));
     checkOkResponse();
