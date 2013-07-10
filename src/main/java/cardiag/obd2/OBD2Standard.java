@@ -3,6 +3,7 @@
  */
 package cardiag.obd2;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,7 +20,7 @@ import cardiag.serial.SerialUtils;
 /**
  * @author David Matějček
  */
-public class OBD2Standard {
+public class OBD2Standard implements Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(OBD2Standard.class);
 
@@ -28,9 +29,20 @@ public class OBD2Standard {
 
   public OBD2Standard(final PortConfiguration cfg) throws PortCommunicationException {
     this.comm = new PortCommunication(cfg);
+    this.reset();
+  }
+
+
+  public void reset() throws PortCommunicationException {
+    this.comm.reset();
     this.comm.reset();
     this.comm.setEcho(false);
     this.comm.setLineTermination(false);
+  }
+
+
+  public void close() {
+    this.comm.close();
   }
 
 
@@ -55,10 +67,13 @@ public class OBD2Standard {
     final List<Response> responses = new ArrayList<Response>(lines.size());
     for (final String line : lines) {
       final String[] vals = line.split(" ");
+      if ("7F".equals(vals[0])) {
+        throw new PortCommunicationException("Error response: " + line);
+      }
       final String[] data;
       final PID responsePID;
       final int dataOffset;
-      if (mode == Mode.DIAGNOSTIC) {
+      if (mode == Mode.DIAGNOSTIC || mode == Mode.CLEAR_TROUBLE_CODES) {
         dataOffset = 1;
         responsePID = null;
       } else {
@@ -110,6 +125,31 @@ public class OBD2Standard {
   }
 
 
+  public void clearTroubleCodes() throws PortCommunicationException {
+    askOneLine(Mode.CLEAR_TROUBLE_CODES, PID.CLEAR_TROUBLE_CODES);
+  }
+
+
+  public MonitorStatus getMonitorStatus() throws PortCommunicationException {
+    Response response = askOneLine(Mode.CURRENT_DATA, PID.MONITOR_STATUS);
+    String[] data = response.getData();
+    boolean[] a = SerialUtils.convertHexToBooleanArray(data[0]);
+    boolean[] b = SerialUtils.convertHexToBooleanArray(data[1]);
+    boolean[] c = SerialUtils.convertHexToBooleanArray(data[2]);
+    boolean[] d = SerialUtils.convertHexToBooleanArray(data[3]);
+    MonitorStatus status = new MonitorStatus();
+    status.setMIL(a[0]);
+    status.setEmissionRelatedDTCs(SerialUtils.toInteger(Arrays.copyOfRange(a, 1, 8)));
+    status.setMissfire(b[7], b[3]);
+    status.setFuel(b[6], b[2]);
+    status.setComponents(b[5], b[1]);
+    status.setIgnition(b[4]);
+    status.setReservedBitB7(b[0]);
+// TODO: C and D
+    return status;
+  }
+
+
   public List<Fault> getErrorReport() throws PortCommunicationException {
     final List<Response> responses = ask(Mode.DIAGNOSTIC, PID.DIAGNOSTIC_CODES);
     if (responses.isEmpty()) {
@@ -122,20 +162,84 @@ public class OBD2Standard {
       final boolean[] b1 = SerialUtils.convertHexToBooleanArray(data[1]);
       final Fault fault1 = Fault.decode(a1, b1);
       LOG.info("Parsed fault code1: {}", fault1.getCode());
-      faults.add(fault1);
+      if (!"P0000".equals(fault1.getCode())) {
+        faults.add(fault1);
+      }
       final boolean[] a2 = SerialUtils.convertHexToBooleanArray(data[2]);
       final boolean[] b2 = SerialUtils.convertHexToBooleanArray(data[3]);
       final Fault fault2 = Fault.decode(a2, b2);
       LOG.info("Parsed fault code2: {}", fault2.getCode());
-      faults.add(fault2);
+      if (!"P0000".equals(fault2.getCode())) {
+        faults.add(fault2);
+      }
       final boolean[] a3 = SerialUtils.convertHexToBooleanArray(data[4]);
       final boolean[] b3 = SerialUtils.convertHexToBooleanArray(data[5]);
       final Fault fault3 = Fault.decode(a3, b3);
       LOG.info("Parsed fault code3: {}", fault3.getCode());
-      faults.add(fault3);
+      if (!"P0000".equals(fault3.getCode())) {
+        faults.add(fault3);
+      }
     }
 
     return faults;
+  }
+
+
+  public double getEngineLoad(boolean freezed) throws PortCommunicationException {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.ENGINE_LOAD);
+    int encoded = Integer.parseInt(line.getData()[0], 16);
+    return (encoded * 100) / 255;
+  }
+
+
+  public int getEngineCoolantTemperature(boolean freezed) throws PortCommunicationException {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.ENGINE_COOLANT_TEMP);
+    int encoded = Integer.parseInt(line.getData()[0], 16);
+    return encoded - 40;
+  }
+
+
+  public int getIntakeAirTemperature(boolean freezed) throws PortCommunicationException {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.AIR_TEMP_INTAKE);
+    int encoded = Integer.parseInt(line.getData()[0], 16);
+    return encoded - 40;
+  }
+
+
+  public double getFuelTrimPercent(boolean freezed, boolean longTerm, int bank) throws PortCommunicationException {
+    final PID pid;
+    if (bank == 1) {
+      pid = longTerm ? PID.FUEL_TRIM_PERCENT_LONG_BANK1 : PID.FUEL_TRIM_PERCENT_SHORT_BANK1;
+    } else if (bank == 2) {
+      pid = longTerm ? PID.FUEL_TRIM_PERCENT_LONG_BANK2 : PID.FUEL_TRIM_PERCENT_SHORT_BANK2;
+    } else {
+      throw new IllegalArgumentException("Invalid bank: " + bank);
+    }
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, pid);
+    int encoded = Integer.parseInt(line.getData()[0], 16);
+    return ((encoded - 128) * 100) / 128;
+  }
+
+  public int getDistanceWithMalfunction(boolean freezed) throws PortCommunicationException {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.DISTANCE_WITH_MALFUNCTION);
+    int encodedA = Integer.parseInt(line.getData()[0], 16);
+    int encodedB = Integer.parseInt(line.getData()[1], 16);
+    return encodedA * 256 + encodedB;
+  }
+
+
+  public int getDistanceSinceCodesCleared(boolean freezed) throws PortCommunicationException {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.DISTANCE_FROM_CODES_CLEARED);
+    int encodedA = Integer.parseInt(line.getData()[0], 16);
+    int encodedB = Integer.parseInt(line.getData()[1], 16);
+    return encodedA * 256 + encodedB;
+  }
+
+
+  public double getFuelLevelInput(boolean freezed) throws PortCommunicationException {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.FUEL_LEVEL_INPUT);
+    int encoded = Integer.parseInt(line.getData()[0], 16);
+    return (encoded * 100) / 255;
   }
 
 }

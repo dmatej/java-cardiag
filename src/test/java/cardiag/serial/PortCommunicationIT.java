@@ -5,6 +5,7 @@ package cardiag.serial;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +26,12 @@ public class PortCommunicationIT {
     this.comm.reset();
     this.comm.setEcho(false);
     this.comm.setLineTermination(false);
+  }
+
+
+  @After
+  public void close() {
+    this.comm.close();
   }
 
 

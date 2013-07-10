@@ -25,7 +25,6 @@ public enum FuelStatus {
   }
 
 
-  // FIXME: parse only one code, not response.
   public static FuelStatus parseHex(final String hex) {
     if (hex == null) {
       throw new IllegalArgumentException("Invalid hex code: " + hex);

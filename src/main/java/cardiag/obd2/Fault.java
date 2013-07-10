@@ -3,6 +3,8 @@
  */
 package cardiag.obd2;
 
+import cardiag.serial.SerialUtils;
+
 
 /**
  * @author David Matějček
@@ -23,6 +25,12 @@ public class Fault {
 
   public String getCode() {
     return this.code;
+  }
+
+
+  @Override
+  public String toString() {
+    return getCode();
   }
 
 
@@ -74,15 +82,7 @@ public class Fault {
 
 
   private static String toHex(boolean... bools) {
-    int base = 1;
-    int index = bools.length - 1;
-    int value = 0;
-    while(index >= 0) {
-      value += bools[index] ? base : 0;
-      base *= 2;
-      index--;
-    }
-    return Integer.toHexString(value);
+    return Integer.toHexString(SerialUtils.toInteger(bools));
   }
 
 }

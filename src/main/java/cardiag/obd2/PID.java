@@ -6,6 +6,7 @@ package cardiag.obd2;
 import static cardiag.obd2.Mode.*;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +17,27 @@ public class PID {
 
   private static final Logger LOG = LoggerFactory.getLogger(PID.class);
 
-  public static final PID PIDS_SUPPORTED = new PID(0, CURRENT_DATA);
   public static final PID DIAGNOSTIC_CODES = new PID(0, DIAGNOSTIC);
+  public static final PID CLEAR_TROUBLE_CODES = new PID(0, Mode.CLEAR_TROUBLE_CODES);
   public static final PID VIN = new PID(2, VEHICLE_INFO);
+
+  public static final PID PIDS_SUPPORTED = new PID(0, CURRENT_DATA);
+  public static final PID MONITOR_STATUS = new PID(1, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_STATUS = new PID(3, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID ENGINE_LOAD = new PID(4, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID ENGINE_COOLANT_TEMP = new PID(5, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID FUEL_TRIM_PERCENT_SHORT_BANK1 = new PID(6, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID FUEL_TRIM_PERCENT_LONG_BANK1 = new PID(7, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID FUEL_TRIM_PERCENT_SHORT_BANK2 = new PID(8, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID FUEL_TRIM_PERCENT_LONG_BANK2 = new PID(9, FREEZE_FRAME_DATA, CURRENT_DATA);
+
+  public static final PID AIR_TEMP_INTAKE = new PID(0x0F, FREEZE_FRAME_DATA, CURRENT_DATA);
+
+  public static final PID DISTANCE_WITH_MALFUNCTION = new PID(0x21, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID FUEL_LEVEL_INPUT = new PID(0x2F, FREEZE_FRAME_DATA, CURRENT_DATA);
+
+  public static final PID DISTANCE_FROM_CODES_CLEARED = new PID(0x31, FREEZE_FRAME_DATA, CURRENT_DATA);
+
 
 
   private final Mode[] allowedModes;
@@ -38,6 +56,12 @@ public class PID {
   }
 
 
+  @Override
+  public String toString() {
+    return ReflectionToStringBuilder.toString(this);
+  }
+
+
   // the problem is that some pids have very different meaning in different modes.
   public static PID parseHex(final String hex, final Mode mode) {
     LOG.debug("parseHex(hex={}, mode={})", hex, mode);
@@ -47,11 +71,42 @@ public class PID {
     final int code = Integer.parseInt(hex, 16);
     switch (code) {
       case 0:
-        return valid(mode, PIDS_SUPPORTED);
+        switch (mode) {
+          case CURRENT_DATA:
+            return valid(mode, PIDS_SUPPORTED);
+          case DIAGNOSTIC:
+            return valid(mode, DIAGNOSTIC_CODES);
+          case CLEAR_TROUBLE_CODES:
+            return valid(mode, CLEAR_TROUBLE_CODES);
+          default:
+            break;
+        }
+      case 1:
+        return valid(mode, MONITOR_STATUS);
       case 2:
         return valid(mode, VIN);
       case 3:
         return valid(mode, FUEL_STATUS);
+      case 4:
+        return valid(mode, ENGINE_LOAD);
+      case 5:
+        return valid(mode, ENGINE_COOLANT_TEMP);
+      case 6:
+        return valid(mode, FUEL_TRIM_PERCENT_SHORT_BANK1);
+      case 7:
+        return valid(mode, FUEL_TRIM_PERCENT_LONG_BANK2);
+      case 8:
+        return valid(mode, FUEL_TRIM_PERCENT_SHORT_BANK1);
+      case 9:
+        return valid(mode, FUEL_TRIM_PERCENT_LONG_BANK2);
+      case 0x0F:
+        return valid(mode, AIR_TEMP_INTAKE);
+      case 0x21:
+        return valid(mode, DISTANCE_WITH_MALFUNCTION);
+      case 0x2F:
+        return valid(mode, FUEL_LEVEL_INPUT);
+      case 0x31:
+        return valid(mode, DISTANCE_FROM_CODES_CLEARED);
       default:
         throw new IllegalArgumentException("Invalid PID: " + hex);
     }

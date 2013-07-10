@@ -3,6 +3,7 @@
  */
 package cardiag.serial;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +20,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author David Matějček
  */
-public class PortCommunication {
+public class PortCommunication implements Closeable {
 
   private static final Logger LOG = LoggerFactory.getLogger(PortCommunication.class);
   private static final String RESPONSE_OK = "OK";
@@ -164,8 +165,21 @@ public class PortCommunication {
   }
 
 
+  public void setEcho(final boolean on) throws PortCommunicationException {
+    LOG.debug("setEcho(on={})", on);
+    writeln("ATE", translate(on));
+    checkOkResponse();
+  }
+
+
+  public void setLineTermination(final boolean on) throws PortCommunicationException {
+    LOG.debug("setLineTermination(on={})", on);
+    writeln("ATL", translate(on));
+    checkOkResponse();
+  }
+
+
   /**
-   *
    * @throws PortCommunicationException
    */
   public void reset() throws PortCommunicationException {
@@ -179,17 +193,13 @@ public class PortCommunication {
   }
 
 
-  public void setEcho(final boolean on) throws PortCommunicationException {
-    LOG.debug("setEcho(on={})", on);
-    writeln("ATE", translate(on));
-    checkOkResponse();
-  }
-
-
-  public void setLineTermination(final boolean on) throws PortCommunicationException {
-    LOG.debug("setLineTermination(on={})", on);
-    writeln("ATL", translate(on));
-    checkOkResponse();
+  @Override
+  public void close() {
+    try {
+      this.port.closePort();
+    } catch (SerialPortException e) {
+      throw new IllegalStateException("Cannot close the port.", e);
+    }
   }
 
 }

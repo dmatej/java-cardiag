@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
  * @author David Matějček
  */
 public enum Mode {
-  CURRENT_DATA(1), FREEZE_FRAME_DATA(2), DIAGNOSTIC(3), VEHICLE_INFO(9);
+  CURRENT_DATA(1), FREEZE_FRAME_DATA(2), DIAGNOSTIC(3), CLEAR_TROUBLE_CODES(4), VEHICLE_INFO(9);
 
   private int code;
 

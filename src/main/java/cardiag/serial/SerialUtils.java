@@ -47,4 +47,19 @@ public class SerialUtils {
     }
     return bools;
   }
+
+
+  public static int toInteger(boolean... bools) {
+    int base = 1;
+    int index = bools.length - 1;
+    int value = 0;
+    while(index >= 0) {
+      value += bools[index] ? base : 0;
+      base *= 2;
+      index--;
+    }
+    return value;
+  }
+
+
 }
