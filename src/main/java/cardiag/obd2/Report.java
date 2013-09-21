@@ -26,6 +26,7 @@ public class Report {
   private Double fuelTrimPercentShortTerm;
   private Double fuelTrimPercentLongTerm;
   private Integer intakeAirTemperature;
+  private AirStatus secondaryAirStatus;
 
 
   public boolean[] getSupportedPIDS() {
@@ -33,7 +34,7 @@ public class Report {
   }
 
 
-  public void setSupportedPIDS(boolean[] supportedPIDS) {
+  public void setSupportedPIDS(final boolean[] supportedPIDS) {
     if (supportedPIDS == null) {
       this.supportedPIDS = null;
     } else {
@@ -47,7 +48,7 @@ public class Report {
   }
 
 
-  public void setMonitorStatus(MonitorStatus monitorStatus) {
+  public void setMonitorStatus(final MonitorStatus monitorStatus) {
     this.monitorStatus = monitorStatus;
   }
 
@@ -57,7 +58,7 @@ public class Report {
   }
 
 
-  public void setDistanceSinceErrorCodesCleared(Integer distanceSinceErrorCodesCleared) {
+  public void setDistanceSinceErrorCodesCleared(final Integer distanceSinceErrorCodesCleared) {
     this.distanceSinceErrorCodesCleared = distanceSinceErrorCodesCleared;
   }
 
@@ -67,7 +68,7 @@ public class Report {
   }
 
 
-  public void setDistanceWithMalfunction(Integer distanceWithMalfunction) {
+  public void setDistanceWithMalfunction(final Integer distanceWithMalfunction) {
     this.distanceWithMalfunction = distanceWithMalfunction;
   }
 
@@ -77,7 +78,7 @@ public class Report {
   }
 
 
-  public void setEngineCoolantTemperature(Integer engineCoolantTemperature) {
+  public void setEngineCoolantTemperature(final Integer engineCoolantTemperature) {
     this.engineCoolantTemperature = engineCoolantTemperature;
   }
 
@@ -87,7 +88,7 @@ public class Report {
   }
 
 
-  public void setEngineLoad(Double engineLoad) {
+  public void setEngineLoad(final Double engineLoad) {
     this.engineLoad = engineLoad;
   }
 
@@ -97,7 +98,7 @@ public class Report {
   }
 
 
-  public void setFuelInjectionTiming(Double fuelInjectionTiming) {
+  public void setFuelInjectionTiming(final Double fuelInjectionTiming) {
     this.fuelInjectionTiming = fuelInjectionTiming;
   }
 
@@ -107,7 +108,7 @@ public class Report {
   }
 
 
-  public void setFuelLevelInput(Double fuelLevelInput) {
+  public void setFuelLevelInput(final Double fuelLevelInput) {
     this.fuelLevelInput = fuelLevelInput;
   }
 
@@ -117,7 +118,7 @@ public class Report {
   }
 
 
-  public void setFuelRate(Double fuelRate) {
+  public void setFuelRate(final Double fuelRate) {
     this.fuelRate = fuelRate;
   }
 
@@ -127,7 +128,7 @@ public class Report {
   }
 
 
-  public void setFuelStatus(FuelStatus fuelStatus) {
+  public void setFuelStatus(final FuelStatus fuelStatus) {
     this.fuelStatus = fuelStatus;
   }
 
@@ -137,7 +138,7 @@ public class Report {
   }
 
 
-  public void setFuelTrimPercentShortTerm(Double fuelTrimPercentShortTerm) {
+  public void setFuelTrimPercentShortTerm(final Double fuelTrimPercentShortTerm) {
     this.fuelTrimPercentShortTerm = fuelTrimPercentShortTerm;
   }
 
@@ -147,7 +148,7 @@ public class Report {
   }
 
 
-  public void setFuelTrimPercentLongTerm(Double fuelTrimPercentLongTerm) {
+  public void setFuelTrimPercentLongTerm(final Double fuelTrimPercentLongTerm) {
     this.fuelTrimPercentLongTerm = fuelTrimPercentLongTerm;
   }
 
@@ -157,12 +158,12 @@ public class Report {
   }
 
 
-  public void setIntakeAirTemperature(Integer intakeAirTemperature) {
+  public void setIntakeAirTemperature(final Integer intakeAirTemperature) {
     this.intakeAirTemperature = intakeAirTemperature;
   }
 
 
-  public void setFaults(List<Fault> faults) {
+  public void setFaults(final List<Fault> faults) {
     this.faults = faults;
   }
 
@@ -172,6 +173,16 @@ public class Report {
       return null;
     }
     return Collections.unmodifiableList(this.faults);
+  }
+
+
+  public AirStatus getSecondaryAirStatus() {
+    return secondaryAirStatus;
+  }
+
+
+  public void setSecondaryAirStatus(final AirStatus secondaryAirStatus) {
+    this.secondaryAirStatus = secondaryAirStatus;
   }
 
 }

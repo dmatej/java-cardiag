@@ -59,6 +59,7 @@ public class ReportFileWriter {
     writer.writeHeader("Engine timing and fuel");
     writer.writeData("Engine load", report.getEngineLoad(), "%");
     writer.writeData("Fuel injection timing", report.getFuelInjectionTiming(), "°");
+    writer.writeData("Secondary air status", report.getSecondaryAirStatus(), null);
     writer.writeData("Fuel status", report.getFuelStatus(), null);
     writer.writeData("Fuel rate", report.getFuelRate(), "L/h");
     writer.writeData("Fuel level input", report.getFuelLevelInput(), "%");
