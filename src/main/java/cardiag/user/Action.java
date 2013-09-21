@@ -9,7 +9,8 @@ package cardiag.user;
  */
 public enum Action {
 
-  REPORT;
+  REPORT,
+  CLEAR_TROUBLE_CODES;
 
 
   public static Action parse(final String str) {

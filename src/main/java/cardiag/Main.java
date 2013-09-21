@@ -46,19 +46,25 @@ public class Main {
     final List<String> portNames = SerialUtils.getPortNames();
     final PortConfiguration cfg = user.readPortConfiguration(portNames);
 
-    final OBD2Standard obd2 = new OBD2Standard(cfg);
     final Action action = parseAction(args);
 
-    if (action == Action.REPORT) {
-      final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-      final File file = new File("report" + sdf.format(new Date()) + ".txt");
-      final Report report = obd2.createReport();
-      final ReportFileWriter writer = new ReportFileWriter(file);
-      writer.write(report);
-    }
+    final OBD2Standard obd2 = new OBD2Standard(cfg);
+    try {
+      if (action == Action.REPORT) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        final File file = new File("report" + sdf.format(new Date()) + ".txt");
+        final Report report = obd2.createReport();
+        final ReportFileWriter writer = new ReportFileWriter(file);
+        writer.write(report);
+      } else if (action == Action.CLEAR_TROUBLE_CODES) {
+        obd2.clearTroubleCodes();
+      }
 
-    // TODO: while(true) cycle to read user commands, run them and to process responses until user
-    // calls exit.
+      // TODO: while(true) cycle to read user commands, run them and to process responses until user
+      // calls exit.
+    } finally {
+      obd2.close();
+    }
   }
 
 

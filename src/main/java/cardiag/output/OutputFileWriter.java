@@ -72,15 +72,19 @@ public class OutputFileWriter implements Closeable {
    * Writes parameters into the single line in the outputFile.
    *
    * @param label
-   * @param value
-   * @param unit
+   * @param value - may be null, then -- are written.
+   * @param unit - may be null, then not written.
    */
-  public void writeData(final String label, final String value, final String unit) {
+  public void writeData(final String label, final Object value, final String unit) {
     LOG.debug("writeData(label={}, value={}, unit={})", label, value, unit);
 
     final StringBuilder string = new StringBuilder(256);
     string.append(label).append(": ");
-    string.append(value);
+    if (value == null) {
+      string.append("--");
+    } else {
+      string.append(value);
+    }
     if (unit != null) {
       string.append(unit);
     }

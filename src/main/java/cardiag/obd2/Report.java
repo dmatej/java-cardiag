@@ -4,6 +4,8 @@
 package cardiag.obd2;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author David Matějček
@@ -12,17 +14,18 @@ public class Report {
 
   private boolean[] supportedPIDS;
   private MonitorStatus monitorStatus;
-  private int distanceSinceErrorCodesCleared;
-  private int distanceWithMalfunction;
-  private int engineCoolantTemperature;
-  private double engineLoad;
-  private double fuelInjectionTiming;
-  private double fuelLevelInput;
-  private double fuelRate;
+  private List<Fault> faults;
+  private Integer distanceSinceErrorCodesCleared;
+  private Integer distanceWithMalfunction;
+  private Integer engineCoolantTemperature;
+  private Double engineLoad;
+  private Double fuelInjectionTiming;
+  private Double fuelLevelInput;
+  private Double fuelRate;
   private FuelStatus fuelStatus;
-  private double fuelTrimPercentShortTerm;
-  private double fuelTrimPercentLongTerm;
-  private int intakeAirTemperature;
+  private Double fuelTrimPercentShortTerm;
+  private Double fuelTrimPercentLongTerm;
+  private Integer intakeAirTemperature;
 
 
   public boolean[] getSupportedPIDS() {
@@ -45,72 +48,72 @@ public class Report {
   }
 
 
-  public int getDistanceSinceErrorCodesCleared() {
+  public Integer getDistanceSinceErrorCodesCleared() {
     return distanceSinceErrorCodesCleared;
   }
 
 
-  public void setDistanceSinceErrorCodesCleared(int distanceSinceErrorCodesCleared) {
+  public void setDistanceSinceErrorCodesCleared(Integer distanceSinceErrorCodesCleared) {
     this.distanceSinceErrorCodesCleared = distanceSinceErrorCodesCleared;
   }
 
 
-  public int getDistanceWithMalfunction() {
+  public Integer getDistanceWithMalfunction() {
     return distanceWithMalfunction;
   }
 
 
-  public void setDistanceWithMalfunction(int distanceWithMalfunction) {
+  public void setDistanceWithMalfunction(Integer distanceWithMalfunction) {
     this.distanceWithMalfunction = distanceWithMalfunction;
   }
 
 
-  public int getEngineCoolantTemperature() {
+  public Integer getEngineCoolantTemperature() {
     return engineCoolantTemperature;
   }
 
 
-  public void setEngineCoolantTemperature(int engineCoolantTemperature) {
+  public void setEngineCoolantTemperature(Integer engineCoolantTemperature) {
     this.engineCoolantTemperature = engineCoolantTemperature;
   }
 
 
-  public double getEngineLoad() {
+  public Double getEngineLoad() {
     return engineLoad;
   }
 
 
-  public void setEngineLoad(double engineLoad) {
+  public void setEngineLoad(Double engineLoad) {
     this.engineLoad = engineLoad;
   }
 
 
-  public double getFuelInjectionTiming() {
+  public Double getFuelInjectionTiming() {
     return fuelInjectionTiming;
   }
 
 
-  public void setFuelInjectionTiming(double fuelInjectionTiming) {
+  public void setFuelInjectionTiming(Double fuelInjectionTiming) {
     this.fuelInjectionTiming = fuelInjectionTiming;
   }
 
 
-  public double getFuelLevelInput() {
+  public Double getFuelLevelInput() {
     return fuelLevelInput;
   }
 
 
-  public void setFuelLevelInput(double fuelLevelInput) {
+  public void setFuelLevelInput(Double fuelLevelInput) {
     this.fuelLevelInput = fuelLevelInput;
   }
 
 
-  public double getFuelRate() {
+  public Double getFuelRate() {
     return fuelRate;
   }
 
 
-  public void setFuelRate(double fuelRate) {
+  public void setFuelRate(Double fuelRate) {
     this.fuelRate = fuelRate;
   }
 
@@ -125,33 +128,43 @@ public class Report {
   }
 
 
-  public double getFuelTrimPercentShortTerm() {
+  public Double getFuelTrimPercentShortTerm() {
     return fuelTrimPercentShortTerm;
   }
 
 
-  public void setFuelTrimPercentShortTerm(double fuelTrimPercentShortTerm) {
+  public void setFuelTrimPercentShortTerm(Double fuelTrimPercentShortTerm) {
     this.fuelTrimPercentShortTerm = fuelTrimPercentShortTerm;
   }
 
 
-  public double getFuelTrimPercentLongTerm() {
+  public Double getFuelTrimPercentLongTerm() {
     return fuelTrimPercentLongTerm;
   }
 
 
-  public void setFuelTrimPercentLongTerm(double fuelTrimPercentLongTerm) {
+  public void setFuelTrimPercentLongTerm(Double fuelTrimPercentLongTerm) {
     this.fuelTrimPercentLongTerm = fuelTrimPercentLongTerm;
   }
 
 
-  public int getIntakeAirTemperature() {
+  public Integer getIntakeAirTemperature() {
     return intakeAirTemperature;
   }
 
 
-  public void setIntakeAirTemperature(int intakeAirTemperature) {
+  public void setIntakeAirTemperature(Integer intakeAirTemperature) {
     this.intakeAirTemperature = intakeAirTemperature;
+  }
+
+
+  public void setFaults(List<Fault> faults) {
+    this.faults = faults;
+  }
+
+
+  public List<Fault> getFaults() {
+    return Collections.unmodifiableList(this.faults);
   }
 
 }
