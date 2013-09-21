@@ -31,6 +31,7 @@ public class Report {
   private Double catalystTemperatureSensor1;
   private Double catalystTemperatureSensor2;
   private Integer ambientAirTemperature;
+  private Integer engineOilTemperature;
 
 
   public boolean[] getSupportedPIDS() {
@@ -227,6 +228,16 @@ public class Report {
 
   public void setAmbientAirTemperature(final Integer ambientAirTemperature) {
     this.ambientAirTemperature = ambientAirTemperature;
+  }
+
+
+  public Integer getEngineOilTemperature() {
+    return engineOilTemperature;
+  }
+
+
+  public void setEngineOilTemperature(final Integer engineOilTemperature) {
+    this.engineOilTemperature = engineOilTemperature;
   }
 
 }

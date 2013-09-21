@@ -79,6 +79,7 @@ public class OBD2Standard implements Closeable {
     report.setFaults(getErrorReport());
 
     report.setAmbientAirTemperature(getAmbientAirTemperature(false));
+    report.setEngineOilTemperature(getEngineOilTemperature(false));
 
     report.setDistanceSinceErrorCodesCleared(getDistanceSinceCodesCleared(false));
     report.setDistanceWithMalfunction(getDistanceWithMalfunction(false));
@@ -316,6 +317,16 @@ public class OBD2Standard implements Closeable {
 
   public Integer getEngineCoolantTemperature(final boolean freezed) {
     final Response line = askOneLine(getMode(freezed), PID.ENGINE_COOLANT_TEMP);
+    if (line.isError()) {
+      return null;
+    }
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
+    return encoded - 40;
+  }
+
+
+  public Integer getEngineOilTemperature(final boolean freezed) {
+    final Response line = askOneLine(getMode(freezed), PID.ENGINE_OIL_TEMPERATURE);
     if (line.isError()) {
       return null;
     }

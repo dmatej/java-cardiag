@@ -65,6 +65,7 @@ public class ReportFileWriter {
 
     writer.writeHeader("Engine Temperatures");
     writer.writeData("Engine coolant temperature", report.getEngineCoolantTemperature(), DEGREES_OF_CENTIGRADE);
+    writer.writeData("Engine oil temperature", report.getEngineOilTemperature(), DEGREES_OF_CENTIGRADE);
     writer.writeData("Intake air temperature", report.getIntakeAirTemperature(), DEGREES_OF_CENTIGRADE);
     writer.writeData("Catalyst temperature - sensor1", report.getCatalystTemperatureSensor1(), DEGREES_OF_CENTIGRADE);
     writer.writeData("Catalyst temperature - sensor2", report.getCatalystTemperatureSensor2(), DEGREES_OF_CENTIGRADE);
