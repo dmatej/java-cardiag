@@ -54,17 +54,16 @@ public class ReportFileWriter {
 
     writer.writeHeader("Engine Temperatures");
     writer.writeData("Engine coolant temperature", report.getEngineCoolantTemperature(), "°C");
-    writer.writeData("Intake air temperatures", report.getIntakeAirTemperature(), "");
+    writer.writeData("Intake air temperature", report.getIntakeAirTemperature(), "°C");
 
     writer.writeHeader("Engine timing and fuel");
     writer.writeData("Engine load", report.getEngineLoad(), "%");
-    writer.writeData("Fuel injection timing", report.getFuelInjectionTiming(), "");
-    writer.writeData("Fuel level timing", report.getFuelLevelInput(), "°");
-    writer.writeData("Fuel level input", report.getFuelLevelInput(), "");
-    writer.writeData("Fuel rate", report.getFuelRate(), "");
+    writer.writeData("Fuel injection timing", report.getFuelInjectionTiming(), "°");
     writer.writeData("Fuel status", report.getFuelStatus(), null);
-    writer.writeData("Fuel trim pecent in long term", report.getFuelTrimPercentLongTerm(), "");
-    writer.writeData("Fuel trim pecent in short term", report.getFuelTrimPercentShortTerm(), "");
+    writer.writeData("Fuel rate", report.getFuelRate(), "L/h");
+    writer.writeData("Fuel level input", report.getFuelLevelInput(), "%");
+    writer.writeData("Fuel trim pecent in long term", report.getFuelTrimPercentLongTerm(), "%");
+    writer.writeData("Fuel trim pecent in short term", report.getFuelTrimPercentShortTerm(), "%");
     // writer.writeData("", report.get, "");
   }
 }

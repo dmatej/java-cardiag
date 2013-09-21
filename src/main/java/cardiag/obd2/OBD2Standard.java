@@ -84,8 +84,9 @@ public class OBD2Standard implements Closeable {
     report.setFuelLevelInput(getFuelLevelInput(false));
     report.setFuelRate(getFuelRate(false));
     report.setFuelStatus(getFuelStatus(false));
-    report.setFuelTrimPercentShortTerm(getFuelTrimPercent(false, false, 0));
-    report.setFuelTrimPercentLongTerm(getFuelTrimPercent(false, true, 0));
+    // only bank 1
+    report.setFuelTrimPercentShortTerm(getFuelTrimPercent(false, false, 1));
+    report.setFuelTrimPercentLongTerm(getFuelTrimPercent(false, true, 1));
     report.setIntakeAirTemperature(getIntakeAirTemperature(false));
 
     return report;
@@ -270,6 +271,11 @@ public class OBD2Standard implements Closeable {
   }
 
 
+  /**
+   * @param freezed
+   * @return engine load in percents.
+   * @throws OBD2Exception
+   */
   public Double getEngineLoad(final boolean freezed) throws OBD2Exception {
     final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.ENGINE_LOAD);
     if (line.isError()) {

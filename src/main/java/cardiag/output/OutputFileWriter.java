@@ -59,9 +59,11 @@ public class OutputFileWriter implements Closeable {
   public void writeHeader(final String header) {
     LOG.debug("writeHeader(header={})", header);
     try {
-      this.writer.write(header + '\n');
-      this.writer.write(StringUtils.repeat("-", header.length()) + '\n');
       this.writer.write('\n');
+      final String lineSeparator = StringUtils.repeat("-", header.length()) + '\n';
+      this.writer.write(lineSeparator);
+      this.writer.write(header + '\n');
+      this.writer.write(lineSeparator);
     } catch (IOException e) {
       throw new IllegalStateException("Cannot write to the outputFile: " + outputFile, e);
     }
@@ -86,7 +88,7 @@ public class OutputFileWriter implements Closeable {
       string.append(value);
     }
     if (unit != null) {
-      string.append(unit);
+      string.append(' ').append(unit);
     }
     string.append('\n');
 

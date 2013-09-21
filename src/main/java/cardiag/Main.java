@@ -51,7 +51,7 @@ public class Main {
     final OBD2Standard obd2 = new OBD2Standard(cfg);
     try {
       if (action == Action.REPORT) {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_hhmmss.SSS");
         final File file = new File("report" + sdf.format(new Date()) + ".txt");
         final Report report = obd2.createReport();
         final ReportFileWriter writer = new ReportFileWriter(file);

@@ -39,9 +39,11 @@ public class UserCommunication {
    * @return
    */
   public PortConfiguration readPortConfiguration(final List<String> portNames) {
+    LOG.debug("readPortConfiguration(portNames={})", portNames);
     final PortConfiguration cfg = new PortConfiguration();
     final String selectedPortName = selectPort(portNames);
     cfg.setPortName(selectedPortName);
+    cfg.setCommandTimeout(10000L);
     return cfg;
   }
 
