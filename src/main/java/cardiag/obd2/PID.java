@@ -41,6 +41,10 @@ public class PID {
   public static final PID FUEL_LEVEL_INPUT = new PID(0x2F, FREEZE_FRAME_DATA, CURRENT_DATA);
 
   public static final PID DISTANCE_FROM_CODES_CLEARED = new PID(0x31, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID CATALYST_TEMPERATURE_BANK1_SENSOR1 = new PID(0x3c, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID CATALYST_TEMPERATURE_BANK2_SENSOR1 = new PID(0x3d, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID CATALYST_TEMPERATURE_BANK1_SENSOR2 = new PID(0x3e, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID CATALYST_TEMPERATURE_BANK2_SENSOR2 = new PID(0x3f, FREEZE_FRAME_DATA, CURRENT_DATA);
 
   public static final PID FUEL_INJECTION_TIMING = new PID(0x5d, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_RATE = new PID(0x5e, FREEZE_FRAME_DATA, CURRENT_DATA);
@@ -126,6 +130,14 @@ public class PID {
         return valid(mode, FUEL_LEVEL_INPUT);
       case 0x31:
         return valid(mode, DISTANCE_FROM_CODES_CLEARED);
+      case 0x3c:
+        return valid(mode, CATALYST_TEMPERATURE_BANK1_SENSOR1);
+      case 0x3d:
+        return valid(mode, CATALYST_TEMPERATURE_BANK2_SENSOR1);
+      case 0x3e:
+        return valid(mode, CATALYST_TEMPERATURE_BANK1_SENSOR2);
+      case 0x3f:
+        return valid(mode, CATALYST_TEMPERATURE_BANK2_SENSOR2);
       case 0x5d:
         return valid(mode, FUEL_INJECTION_TIMING);
       case 0x5e:

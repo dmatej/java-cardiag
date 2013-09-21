@@ -59,6 +59,8 @@ public class ReportFileWriter {
     writer.writeHeader("Engine Temperatures");
     writer.writeData("Engine coolant temperature", report.getEngineCoolantTemperature(), "°C");
     writer.writeData("Intake air temperature", report.getIntakeAirTemperature(), "°C");
+    writer.writeData("Catalyst temperature - sensor1", report.getCatalystTemperatureSensor1(), "°C");
+    writer.writeData("Catalyst temperature - sensor2", report.getCatalystTemperatureSensor2(), "°C");
 
     writer.writeHeader("Engine timing and fuel");
     writer.writeData("Engine load", report.getEngineLoad(), "%");

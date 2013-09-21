@@ -93,6 +93,9 @@ public class OBD2Standard implements Closeable {
     report.setFuelTrimPercentLongTerm(getFuelTrimPercent(false, true, 1));
     report.setIntakeAirTemperature(getIntakeAirTemperature(false));
 
+    report.setCatalystTemperatureSensor1(getCatalystTemperature(false, 1, 1));
+    report.setCatalystTemperatureSensor2(getCatalystTemperature(false, 1, 2));
+
     return report;
   }
 
@@ -347,9 +350,39 @@ public class OBD2Standard implements Closeable {
   }
 
 
+  public Double getCatalystTemperature(final boolean freezed, final int bank, final int sensor) {
+    final PID pid;
+    if (sensor != 1 && sensor != 2) {
+      throw new IllegalArgumentException("Invalid sensor: " + sensor);
+    }
+    if (bank == 1) {
+      if (sensor == 1) {
+        pid = PID.CATALYST_TEMPERATURE_BANK1_SENSOR1;
+      } else {
+        pid = PID.CATALYST_TEMPERATURE_BANK1_SENSOR2;
+      }
+    } else if (bank == 2) {
+      if (sensor == 1) {
+        pid = PID.CATALYST_TEMPERATURE_BANK2_SENSOR1;
+      } else {
+        pid = PID.CATALYST_TEMPERATURE_BANK2_SENSOR2;
+      }
+    } else {
+      throw new IllegalArgumentException("Invalid bank: " + bank);
+    }
+
+    final Response response = askOneLine(getMode(freezed), pid);
+    if (response.isError()) {
+      return null;
+    }
+    final int encodedA = Integer.parseInt(response.getData()[0], 16);
+    final int encodedB = Integer.parseInt(response.getData()[1], 16);
+    return ((encodedA * 256.0 + encodedB) / 10.0) - 40.0;
+  }
+
+
   public Integer getDistanceWithMalfunction(final boolean freezed) {
-    final Response line = askOneLine(getMode(freezed),
-        PID.DISTANCE_WITH_MALFUNCTION);
+    final Response line = askOneLine(getMode(freezed), PID.DISTANCE_WITH_MALFUNCTION);
     if (line.isError()) {
       return null;
     }
@@ -360,8 +393,7 @@ public class OBD2Standard implements Closeable {
 
 
   public Integer getDistanceSinceCodesCleared(final boolean freezed) {
-    final Response line = askOneLine(getMode(freezed),
-        PID.DISTANCE_FROM_CODES_CLEARED);
+    final Response line = askOneLine(getMode(freezed), PID.DISTANCE_FROM_CODES_CLEARED);
     if (line.isError()) {
       return null;
     }
