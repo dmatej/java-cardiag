@@ -19,6 +19,7 @@ public class PID {
 
   public static final PID DIAGNOSTIC_CODES = new PID(0, DIAGNOSTIC);
   public static final PID CLEAR_TROUBLE_CODES = new PID(0, Mode.CLEAR_TROUBLE_CODES);
+  public static final PID VIN_COUNT_OF_BYTES = new PID(1, VEHICLE_INFO);
   public static final PID VIN = new PID(2, VEHICLE_INFO);
 
   public static final PID PIDS_SUPPORTED = new PID(0, CURRENT_DATA);
@@ -34,9 +35,13 @@ public class PID {
   public static final PID AIR_TEMP_INTAKE = new PID(0x0F, FREEZE_FRAME_DATA, CURRENT_DATA);
 
   public static final PID DISTANCE_WITH_MALFUNCTION = new PID(0x21, FREEZE_FRAME_DATA, CURRENT_DATA);
-  public static final PID FUEL_LEVEL_INPUT = new PID(0x2F, FREEZE_FRAME_DATA, CURRENT_DATA);
-
   public static final PID DISTANCE_FROM_CODES_CLEARED = new PID(0x31, FREEZE_FRAME_DATA, CURRENT_DATA);
+
+  public static final PID FUEL_INJECTION_TIMING = new PID(0x5d, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID FUEL_LEVEL_INPUT = new PID(0x2F, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID FUEL_RATE = new PID(0x5e, FREEZE_FRAME_DATA, CURRENT_DATA);
+
+
 
 
 
@@ -82,7 +87,12 @@ public class PID {
             break;
         }
       case 1:
-        return valid(mode, MONITOR_STATUS);
+        switch (mode) {
+          case VEHICLE_INFO:
+            return valid(mode, VIN_COUNT_OF_BYTES);
+          default:
+            return valid(mode, MONITOR_STATUS);
+        }
       case 2:
         return valid(mode, VIN);
       case 3:
@@ -107,6 +117,10 @@ public class PID {
         return valid(mode, FUEL_LEVEL_INPUT);
       case 0x31:
         return valid(mode, DISTANCE_FROM_CODES_CLEARED);
+      case 0x5d:
+        return valid(mode, FUEL_INJECTION_TIMING);
+      case 0x5e:
+        return valid(mode, FUEL_RATE);
       default:
         throw new IllegalArgumentException("Invalid PID: " + hex);
     }

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,8 @@ import cardiag.serial.PortConfiguration;
 import cardiag.serial.SerialUtils;
 
 /**
+ * Standard OBD-II functions.
+ *
  * @author David Matějček
  */
 public class OBD2Standard implements Closeable {
@@ -27,13 +30,26 @@ public class OBD2Standard implements Closeable {
   private final PortCommunication comm;
 
 
+  /**
+   * Starts the port communication with some initial conversation.
+   *
+   * @param cfg
+   * @throws PortCommunicationException
+   */
   public OBD2Standard(final PortConfiguration cfg) throws PortCommunicationException {
     this.comm = new PortCommunication(cfg);
     this.reset();
   }
 
 
+  /**
+   * Resets the communication.
+   *
+   * @throws PortCommunicationException
+   */
   public void reset() throws PortCommunicationException {
+    LOG.debug("reset()");
+    // TODO: why is it here twice???
     this.comm.reset();
     this.comm.reset();
     this.comm.setEcho(false);
@@ -41,14 +57,51 @@ public class OBD2Standard implements Closeable {
   }
 
 
+  /**
+   * Closes the communication and port.
+   */
   public void close() {
     this.comm.close();
   }
 
 
-  public List<Response> ask(final Mode mode, final PID pid, final String... hexParams)
-    throws PortCommunicationException {
-    LOG.info("ask(mode={}, pid={}, hexParams={})", mode, pid, hexParams);
+  /**
+   * @return a {@link Report}
+   * @throws OBD2Exception
+   */
+  public Report createReport() throws OBD2Exception {
+    final Report report = new Report();
+    report.setSupportedPIDS(getSupportedPIDs());
+    report.setMonitorStatus(getMonitorStatus());
+
+    report.setDistanceSinceErrorCodesCleared(getDistanceSinceCodesCleared(false));
+    report.setDistanceWithMalfunction(getDistanceWithMalfunction(false));
+
+    report.setEngineCoolantTemperature(getEngineCoolantTemperature(false));
+    report.setEngineLoad(getEngineLoad(false));
+    report.setFuelInjectionTiming(getFuelInjectionTiming(false));
+    report.setFuelLevelInput(getFuelLevelInput(false));
+    report.setFuelRate(getFuelRate(false));
+    report.setFuelStatus(getFuelStatus(false));
+    report.setFuelTrimPercentShortTerm(getFuelTrimPercent(false, false, 0));
+    report.setFuelTrimPercentLongTerm(getFuelTrimPercent(false, true, 0));
+    report.setIntakeAirTemperature(getIntakeAirTemperature(false));
+
+    return report;
+  }
+
+
+  /**
+   * Sends the request to OBD II unit and returns a multiline response.
+   *
+   * @param mode
+   * @param pid
+   * @param hexParams
+   * @return a list of responses. Never null.
+   * @throws OBD2Exception - if the response starts with 7F, this means something like "NO".
+   */
+  protected List<Response> ask(final Mode mode, final PID pid, final String... hexParams) throws OBD2Exception {
+    LOG.debug("ask(mode={}, pid={}, hexParams={})", mode, pid, hexParams);
     final String[] params;
     if (hexParams == null) {
       params = new String[2];
@@ -68,7 +121,7 @@ public class OBD2Standard implements Closeable {
     for (final String line : lines) {
       final String[] vals = line.split(" ");
       if ("7F".equals(vals[0])) {
-        throw new PortCommunicationException("Error response: " + line);
+        throw new OBD2Exception("Error response: " + line);
       }
       final String[] data;
       final PID responsePID;
@@ -92,52 +145,71 @@ public class OBD2Standard implements Closeable {
   }
 
 
-  public Response askOneLine(final Mode mode, final PID pid, final String... hexParams)
-    throws PortCommunicationException {
+  /**
+   * Sends the request to OBD II unit and returns a singleline response.
+   *
+   * @param mode
+   * @param pid
+   * @param hexParams
+   * @return a list of responses. Never null.
+   * @throws OBD2Exception - if the response starts with 7F, this means something like "NO".
+   */
+  protected Response askOneLine(final Mode mode, final PID pid, final String... hexParams) throws OBD2Exception {
     LOG.trace("askOneLine(mode={}, pid={}, hexParams={})", mode, pid, hexParams);
     final List<Response> responses = ask(mode, pid, hexParams);
     if (responses.isEmpty()) {
       return null;
     }
     if (responses.size() > 1) {
-      throw new PortCommunicationException("Too many responses for this command.");
+      // bug or something weird.
+      throw new IllegalStateException("Too many responses for this command: "
+          + ReflectionToStringBuilder.toString(responses));
     }
     final Response response = responses.get(0);
     return response;
   }
 
 
-  public String getVIN() throws PortCommunicationException {
+  /**
+   * @return the VIN code of the car.
+   *
+   * @throws OBD2Exception
+   */
+  public String getVIN() throws OBD2Exception {
+    LOG.debug("getVIN()");
+    final Response responseBytes = askOneLine(Mode.VEHICLE_INFO, PID.VIN_COUNT_OF_BYTES);
+    // TODO: Kalina did not returned any.
+    LOG.info("VIN bytes: {}", Integer.parseInt(responseBytes.getData()[0]), 16);
     final List<Response> response = ask(Mode.VEHICLE_INFO, PID.VIN);
     return response.toString();
   }
 
 
-  public boolean[] getSupportedPIDs() throws PortCommunicationException {
+  public boolean[] getSupportedPIDs() throws OBD2Exception {
     final Response line = askOneLine(Mode.CURRENT_DATA, PID.PIDS_SUPPORTED);
     return SerialUtils.convertHexToBooleanArray(line.getData());
   }
 
 
-  public FuelStatus getFuelStatus(final boolean freezed) throws PortCommunicationException {
+  public FuelStatus getFuelStatus(final boolean freezed) throws OBD2Exception {
     final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.FUEL_STATUS);
     return FuelStatus.parseHex(line.getData()[0]);
   }
 
 
-  public void clearTroubleCodes() throws PortCommunicationException {
+  public void clearTroubleCodes() throws OBD2Exception {
     askOneLine(Mode.CLEAR_TROUBLE_CODES, PID.CLEAR_TROUBLE_CODES);
   }
 
 
-  public MonitorStatus getMonitorStatus() throws PortCommunicationException {
-    Response response = askOneLine(Mode.CURRENT_DATA, PID.MONITOR_STATUS);
-    String[] data = response.getData();
-    boolean[] a = SerialUtils.convertHexToBooleanArray(data[0]);
-    boolean[] b = SerialUtils.convertHexToBooleanArray(data[1]);
-    boolean[] c = SerialUtils.convertHexToBooleanArray(data[2]);
-    boolean[] d = SerialUtils.convertHexToBooleanArray(data[3]);
-    MonitorStatus status = new MonitorStatus();
+  public MonitorStatus getMonitorStatus() throws OBD2Exception {
+    final Response response = askOneLine(Mode.CURRENT_DATA, PID.MONITOR_STATUS);
+    final String[] data = response.getData();
+    final boolean[] a = SerialUtils.convertHexToBooleanArray(data[0]);
+    final boolean[] b = SerialUtils.convertHexToBooleanArray(data[1]);
+    final boolean[] c = SerialUtils.convertHexToBooleanArray(data[2]);
+    final boolean[] d = SerialUtils.convertHexToBooleanArray(data[3]);
+    final MonitorStatus status = new MonitorStatus();
     status.setMIL(a[0]);
     status.setEmissionRelatedDTCs(SerialUtils.toInteger(Arrays.copyOfRange(a, 1, 8)));
     status.setMissfire(b[7], b[3]);
@@ -145,12 +217,12 @@ public class OBD2Standard implements Closeable {
     status.setComponents(b[5], b[1]);
     status.setIgnition(b[4]);
     status.setReservedBitB7(b[0]);
-// TODO: C and D
+    // TODO: C and D
     return status;
   }
 
 
-  public List<Fault> getErrorReport() throws PortCommunicationException {
+  public List<Fault> getErrorReport() throws OBD2Exception {
     final List<Response> responses = ask(Mode.DIAGNOSTIC, PID.DIAGNOSTIC_CODES);
     if (responses.isEmpty()) {
       return Collections.emptyList();
@@ -185,28 +257,28 @@ public class OBD2Standard implements Closeable {
   }
 
 
-  public double getEngineLoad(boolean freezed) throws PortCommunicationException {
+  public double getEngineLoad(final boolean freezed) throws OBD2Exception {
     final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.ENGINE_LOAD);
-    int encoded = Integer.parseInt(line.getData()[0], 16);
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
     return (encoded * 100) / 255;
   }
 
 
-  public int getEngineCoolantTemperature(boolean freezed) throws PortCommunicationException {
+  public int getEngineCoolantTemperature(final boolean freezed) throws OBD2Exception {
     final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.ENGINE_COOLANT_TEMP);
-    int encoded = Integer.parseInt(line.getData()[0], 16);
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
     return encoded - 40;
   }
 
 
-  public int getIntakeAirTemperature(boolean freezed) throws PortCommunicationException {
+  public int getIntakeAirTemperature(final boolean freezed) throws OBD2Exception {
     final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.AIR_TEMP_INTAKE);
-    int encoded = Integer.parseInt(line.getData()[0], 16);
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
     return encoded - 40;
   }
 
 
-  public double getFuelTrimPercent(boolean freezed, boolean longTerm, int bank) throws PortCommunicationException {
+  public double getFuelTrimPercent(final boolean freezed, final boolean longTerm, final int bank) throws OBD2Exception {
     final PID pid;
     if (bank == 1) {
       pid = longTerm ? PID.FUEL_TRIM_PERCENT_LONG_BANK1 : PID.FUEL_TRIM_PERCENT_SHORT_BANK1;
@@ -216,30 +288,48 @@ public class OBD2Standard implements Closeable {
       throw new IllegalArgumentException("Invalid bank: " + bank);
     }
     final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, pid);
-    int encoded = Integer.parseInt(line.getData()[0], 16);
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
     return ((encoded - 128) * 100) / 128;
   }
 
-  public int getDistanceWithMalfunction(boolean freezed) throws PortCommunicationException {
-    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.DISTANCE_WITH_MALFUNCTION);
-    int encodedA = Integer.parseInt(line.getData()[0], 16);
-    int encodedB = Integer.parseInt(line.getData()[1], 16);
+
+  public int getDistanceWithMalfunction(final boolean freezed) throws OBD2Exception {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA,
+        PID.DISTANCE_WITH_MALFUNCTION);
+    final int encodedA = Integer.parseInt(line.getData()[0], 16);
+    final int encodedB = Integer.parseInt(line.getData()[1], 16);
     return encodedA * 256 + encodedB;
   }
 
 
-  public int getDistanceSinceCodesCleared(boolean freezed) throws PortCommunicationException {
-    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.DISTANCE_FROM_CODES_CLEARED);
-    int encodedA = Integer.parseInt(line.getData()[0], 16);
-    int encodedB = Integer.parseInt(line.getData()[1], 16);
+  public int getDistanceSinceCodesCleared(final boolean freezed) throws OBD2Exception {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA,
+        PID.DISTANCE_FROM_CODES_CLEARED);
+    final int encodedA = Integer.parseInt(line.getData()[0], 16);
+    final int encodedB = Integer.parseInt(line.getData()[1], 16);
     return encodedA * 256 + encodedB;
   }
 
 
-  public double getFuelLevelInput(boolean freezed) throws PortCommunicationException {
+  public double getFuelLevelInput(final boolean freezed) throws OBD2Exception {
     final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.FUEL_LEVEL_INPUT);
-    int encoded = Integer.parseInt(line.getData()[0], 16);
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
     return (encoded * 100) / 255;
   }
 
+
+  public double getFuelInjectionTiming(final boolean freezed) throws OBD2Exception {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.FUEL_INJECTION_TIMING);
+    final int encodedA = Integer.parseInt(line.getData()[0], 16);
+    final int encodedB = Integer.parseInt(line.getData()[1], 16);
+    return (encodedA * 256 + encodedB - 26880) / 128;
+  }
+
+
+  public double getFuelRate(final boolean freezed) throws OBD2Exception {
+    final Response line = askOneLine(freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA, PID.FUEL_RATE);
+    final int encodedA = Integer.parseInt(line.getData()[0], 16);
+    final int encodedB = Integer.parseInt(line.getData()[1], 16);
+    return (encodedA * 256 + encodedB) * 0.05;
+  }
 }

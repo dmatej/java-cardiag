@@ -10,7 +10,7 @@ import jssc.SerialPortException;
  *
  * @author David Matějček
  */
-public class PortCommunicationException extends Exception {
+public class PortCommunicationException extends RuntimeException {
 
   private static final long serialVersionUID = 5530145486386126281L;
 

@@ -31,6 +31,8 @@ public class PortCommunication implements Closeable {
 
 
   /**
+   * Initializes and opens the port.
+   *
    * @param cfg - a port configuration
    * @throws PortCommunicationException - cannot initialize the communication.
    */
@@ -165,6 +167,12 @@ public class PortCommunication implements Closeable {
   }
 
 
+  /**
+   * Sends ATE signal and sets the command echo on/off
+   *
+   * @param on
+   * @throws PortCommunicationException
+   */
   public void setEcho(final boolean on) throws PortCommunicationException {
     LOG.debug("setEcho(on={})", on);
     writeln("ATE", translate(on));
@@ -172,6 +180,12 @@ public class PortCommunication implements Closeable {
   }
 
 
+  /**
+   * Sends ATL signal and sets the line termination on/off
+   *
+   * @param on
+   * @throws PortCommunicationException
+   */
   public void setLineTermination(final boolean on) throws PortCommunicationException {
     LOG.debug("setLineTermination(on={})", on);
     writeln("ATL", translate(on));
@@ -180,6 +194,8 @@ public class PortCommunication implements Closeable {
 
 
   /**
+   * Sends AT Z command, resets the communication.
+   *
    * @throws PortCommunicationException
    */
   public void reset() throws PortCommunicationException {
@@ -193,6 +209,9 @@ public class PortCommunication implements Closeable {
   }
 
 
+  /**
+   * Closes the port.
+   */
   @Override
   public void close() {
     try {

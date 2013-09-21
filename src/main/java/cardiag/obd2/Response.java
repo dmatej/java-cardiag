@@ -6,8 +6,9 @@ package cardiag.obd2;
 
 
 /**
- * @author David Matějček
+ * OBD2 protocol response.
  *
+ * @author David Matějček
  */
 public class Response {
 
@@ -16,6 +17,13 @@ public class Response {
   private final String[] data;
 
 
+  /**
+   * Only a simple constructor.
+   *
+   * @param mode - same as the mode of the request.
+   * @param pid - same as the pid of the request.
+   * @param data - returned data.
+   */
   public Response(final Mode mode, final PID pid, final String... data) {
     this.mode = mode;
     this.pid = pid;
@@ -23,6 +31,9 @@ public class Response {
   }
 
 
+  /**
+   * @return a data part of the response - several lines of hex numbers separated by a space.
+   */
   public String[] getData() {
     return data;
   }
