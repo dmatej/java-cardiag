@@ -34,12 +34,15 @@ public class OBD2StandardITest {
 
   @AfterClass
   public static void close() {
-    obd2.close();
+    if (obd2 != null) {
+      obd2.close();
+    }
   }
 
 
   /**
    * Received response: [41 03 01 00]
+   *
    * @throws OBD2Exception
    */
   @Test
@@ -71,7 +74,9 @@ public class OBD2StandardITest {
   // }
 
   /**
-   * [49 02 01 00 00 00 FF, 49 02 02 FF FF FF FF, 49 02 03 FF FF FF FF, 49 02 04 FF FF FF FF, 49 02 05 FF FF FF FF]
+   * [49 02 01 00 00 00 FF, 49 02 02 FF FF FF FF, 49 02 03 FF FF FF FF, 49 02 04 FF FF FF FF, 49 02
+   * 05 FF FF FF FF]
+   *
    * @throws OBD2Exception
    */
   @Test
@@ -82,6 +87,7 @@ public class OBD2StandardITest {
 
   /**
    * [41 04 00] = 0.0%
+   *
    * @throws OBD2Exception
    */
   @Test
@@ -93,6 +99,7 @@ public class OBD2StandardITest {
 
   /**
    * [41 05 37] = 15°C
+   *
    * @throws OBD2Exception
    */
   @Test
@@ -104,6 +111,7 @@ public class OBD2StandardITest {
 
   /**
    * [41 0F 36] = 14°C
+   *
    * @throws OBD2Exception
    */
   @Test
@@ -115,6 +123,7 @@ public class OBD2StandardITest {
   /**
    * [41 06 80] = 0.0%
    * [41 07 80] = 0.0%
+   *
    * @throws OBD2Exception
    */
   @Test
@@ -128,6 +137,7 @@ public class OBD2StandardITest {
 
   /**
    * [41 21 00 00]
+   *
    * @throws OBD2Exception
    */
   @Test
@@ -152,15 +162,17 @@ public class OBD2StandardITest {
 
   @Test
   @Ignore("For Kalina causes error response 7F 01 12")
-  public void testGetFuelInjectionTiming()  throws OBD2Exception {
+  public void testGetFuelInjectionTiming() throws OBD2Exception {
     LOG.info("fuel injection timing: {}°", obd2.getFuelInjectionTiming(false));
   }
 
+
   @Test
-//  @Ignore("For Kalina causes error response 7F 01 12")
-  public void testGetFuelRate()  throws OBD2Exception {
+  // @Ignore("For Kalina causes error response 7F 01 12")
+  public void testGetFuelRate() throws OBD2Exception {
     LOG.info("fuel rate: {} L/h", obd2.getFuelRate(false));
   }
+
 
   @Test
   /**
