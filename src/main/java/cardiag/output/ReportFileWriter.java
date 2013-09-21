@@ -17,6 +17,12 @@ import cardiag.obd2.Report;
 public class ReportFileWriter {
 
   private static final Logger LOG = LoggerFactory.getLogger(ReportFileWriter.class);
+
+  private static final String DEGREES = "°";
+  private static final String DEGREES_OF_CENTIGRADE = "°C";
+  private static final String KILOMETERS = "km";
+  private static final String PERCENTS = "%";
+
   private final File outputFile;
 
 
@@ -48,29 +54,30 @@ public class ReportFileWriter {
 
     writer.writeHeader("Basic info");
     writer.writeData("ECU compatibility", report.getEcuCompatibility(), null);
-    writer.writeData("Supported PIDs", report.getSupportedPIDS(), "");
+    writer.writeData("Supported PIDs", report.getSupportedPIDS(), null);
     writer.writeData("Monitor status", report.getMonitorStatus(), null);
+    writer.writeData("Ambient temperature", report.getAmbientAirTemperature(), DEGREES_OF_CENTIGRADE);
 
     writer.writeHeader("Errors");
-    writer.writeData("Distance since errors cleared", report.getDistanceSinceErrorCodesCleared(), "km");
-    writer.writeData("Distance with malfunction", report.getDistanceWithMalfunction(), "km");
+    writer.writeData("Distance since errors cleared", report.getDistanceSinceErrorCodesCleared(), KILOMETERS);
+    writer.writeData("Distance with malfunction", report.getDistanceWithMalfunction(), KILOMETERS);
     writer.writeData("Reported faults", report.getFaults(), null);
 
     writer.writeHeader("Engine Temperatures");
-    writer.writeData("Engine coolant temperature", report.getEngineCoolantTemperature(), "°C");
-    writer.writeData("Intake air temperature", report.getIntakeAirTemperature(), "°C");
-    writer.writeData("Catalyst temperature - sensor1", report.getCatalystTemperatureSensor1(), "°C");
-    writer.writeData("Catalyst temperature - sensor2", report.getCatalystTemperatureSensor2(), "°C");
+    writer.writeData("Engine coolant temperature", report.getEngineCoolantTemperature(), DEGREES_OF_CENTIGRADE);
+    writer.writeData("Intake air temperature", report.getIntakeAirTemperature(), DEGREES_OF_CENTIGRADE);
+    writer.writeData("Catalyst temperature - sensor1", report.getCatalystTemperatureSensor1(), DEGREES_OF_CENTIGRADE);
+    writer.writeData("Catalyst temperature - sensor2", report.getCatalystTemperatureSensor2(), DEGREES_OF_CENTIGRADE);
 
     writer.writeHeader("Engine timing and fuel");
-    writer.writeData("Engine load", report.getEngineLoad(), "%");
-    writer.writeData("Fuel injection timing", report.getFuelInjectionTiming(), "°");
+    writer.writeData("Engine load", report.getEngineLoad(), PERCENTS);
+    writer.writeData("Fuel injection timing", report.getFuelInjectionTiming(), DEGREES);
     writer.writeData("Secondary air status", report.getSecondaryAirStatus(), null);
     writer.writeData("Fuel status", report.getFuelStatus(), null);
     writer.writeData("Fuel rate", report.getFuelRate(), "L/h");
-    writer.writeData("Fuel level input", report.getFuelLevelInput(), "%");
-    writer.writeData("Fuel trim pecent in long term", report.getFuelTrimPercentLongTerm(), "%");
-    writer.writeData("Fuel trim pecent in short term", report.getFuelTrimPercentShortTerm(), "%");
+    writer.writeData("Fuel level input", report.getFuelLevelInput(), PERCENTS);
+    writer.writeData("Fuel trim pecent in long term", report.getFuelTrimPercentLongTerm(), PERCENTS);
+    writer.writeData("Fuel trim pecent in short term", report.getFuelTrimPercentShortTerm(), PERCENTS);
     // writer.writeData("", report.get, "");
   }
 }

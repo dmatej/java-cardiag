@@ -30,6 +30,7 @@ public class Report {
   private EcuCompatibility ecuCompatibility;
   private Double catalystTemperatureSensor1;
   private Double catalystTemperatureSensor2;
+  private Integer ambientAirTemperature;
 
 
   public boolean[] getSupportedPIDS() {
@@ -204,7 +205,7 @@ public class Report {
   }
 
 
-  public void setCatalystTemperatureSensor1(Double catalystTemperatureSensor1) {
+  public void setCatalystTemperatureSensor1(final Double catalystTemperatureSensor1) {
     this.catalystTemperatureSensor1 = catalystTemperatureSensor1;
   }
 
@@ -214,8 +215,18 @@ public class Report {
   }
 
 
-  public void setCatalystTemperatureSensor2(Double catalystTemperatureSensor2) {
+  public void setCatalystTemperatureSensor2(final Double catalystTemperatureSensor2) {
     this.catalystTemperatureSensor2 = catalystTemperatureSensor2;
+  }
+
+
+  public Integer getAmbientAirTemperature() {
+    return ambientAirTemperature;
+  }
+
+
+  public void setAmbientAirTemperature(final Integer ambientAirTemperature) {
+    this.ambientAirTemperature = ambientAirTemperature;
   }
 
 }

@@ -78,6 +78,8 @@ public class OBD2Standard implements Closeable {
     report.setMonitorStatus(getMonitorStatus());
     report.setFaults(getErrorReport());
 
+    report.setAmbientAirTemperature(getAmbientAirTemperature(false));
+
     report.setDistanceSinceErrorCodesCleared(getDistanceSinceCodesCleared(false));
     report.setDistanceWithMalfunction(getDistanceWithMalfunction(false));
 
@@ -93,8 +95,8 @@ public class OBD2Standard implements Closeable {
     report.setFuelTrimPercentLongTerm(getFuelTrimPercent(false, true, 1));
     report.setIntakeAirTemperature(getIntakeAirTemperature(false));
 
-    report.setCatalystTemperatureSensor1(getCatalystTemperature(false, 1, 1));
-    report.setCatalystTemperatureSensor2(getCatalystTemperature(false, 1, 2));
+    report.setCatalystTemperatureSensor1(getCatalystTemperature(false, 2, 1));
+    report.setCatalystTemperatureSensor2(getCatalystTemperature(false, 2, 2));
 
     return report;
   }
@@ -324,6 +326,16 @@ public class OBD2Standard implements Closeable {
 
   public Integer getIntakeAirTemperature(final boolean freezed) {
     final Response line = askOneLine(getMode(freezed), PID.AIR_TEMP_INTAKE);
+    if (line.isError()) {
+      return null;
+    }
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
+    return encoded - 40;
+  }
+
+
+  public Integer getAmbientAirTemperature(final boolean freezed) {
+    final Response line = askOneLine(getMode(freezed), PID.AMBIENT_AIR_TEMPERATURE);
     if (line.isError()) {
       return null;
     }

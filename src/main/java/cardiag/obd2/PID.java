@@ -46,8 +46,11 @@ public class PID {
   public static final PID CATALYST_TEMPERATURE_BANK1_SENSOR2 = new PID(0x3e, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID CATALYST_TEMPERATURE_BANK2_SENSOR2 = new PID(0x3f, FREEZE_FRAME_DATA, CURRENT_DATA);
 
+  public static final PID AMBIENT_AIR_TEMPERATURE = new PID(0x46, FREEZE_FRAME_DATA, CURRENT_DATA);
+
   public static final PID FUEL_INJECTION_TIMING = new PID(0x5d, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_RATE = new PID(0x5e, FREEZE_FRAME_DATA, CURRENT_DATA);
+
 
 
 
@@ -138,6 +141,8 @@ public class PID {
         return valid(mode, CATALYST_TEMPERATURE_BANK1_SENSOR2);
       case 0x3f:
         return valid(mode, CATALYST_TEMPERATURE_BANK2_SENSOR2);
+      case 0x46:
+        return valid(mode, AMBIENT_AIR_TEMPERATURE);
       case 0x5d:
         return valid(mode, FUEL_INJECTION_TIMING);
       case 0x5e:
