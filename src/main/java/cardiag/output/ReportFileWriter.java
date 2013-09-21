@@ -45,12 +45,16 @@ public class ReportFileWriter {
 
   private void write(final OutputFileWriter writer, final Report report) {
     LOG.trace("write(writer, report)");
+
+    writer.writeHeader("Basic info");
+    writer.writeData("ECU compatibility", report.getEcuCompatibility(), null);
+    writer.writeData("Supported PIDs", report.getSupportedPIDS(), "");
+    writer.writeData("Monitor status", report.getMonitorStatus(), null);
+
     writer.writeHeader("Errors");
     writer.writeData("Distance since errors cleared", report.getDistanceSinceErrorCodesCleared(), "km");
     writer.writeData("Distance with malfunction", report.getDistanceWithMalfunction(), "km");
     writer.writeData("Reported faults", report.getFaults(), null);
-    writer.writeData("Monitor status", report.getMonitorStatus(), null);
-    writer.writeData("Supported PIDs", report.getSupportedPIDS(), "");
 
     writer.writeHeader("Engine Temperatures");
     writer.writeData("Engine coolant temperature", report.getEngineCoolantTemperature(), "°C");

@@ -37,6 +37,7 @@ public class OBD2Standard implements Closeable {
    * @throws PortCommunicationException
    */
   public OBD2Standard(final PortConfiguration cfg) throws PortCommunicationException {
+    LOG.debug("OBD2Standard(cfg={})", cfg);
     this.comm = new PortCommunication(cfg);
     this.reset();
   }
@@ -61,6 +62,7 @@ public class OBD2Standard implements Closeable {
    * Closes the communication and port.
    */
   public void close() {
+    LOG.debug("close()");
     this.comm.close();
   }
 
@@ -69,8 +71,10 @@ public class OBD2Standard implements Closeable {
    * @return a {@link Report}
    */
   public Report createReport() {
+    LOG.trace("createReport()");
     final Report report = new Report();
     report.setSupportedPIDS(getSupportedPIDs());
+    report.setEcuCompatibility(getEcuCompatibility());
     report.setMonitorStatus(getMonitorStatus());
     report.setFaults(getErrorReport());
 
@@ -212,6 +216,15 @@ public class OBD2Standard implements Closeable {
     }
     // TODO: two bytes = two systems
     return FuelStatus.parseHex(line.getData()[0]);
+  }
+
+
+  public EcuCompatibility getEcuCompatibility() {
+    final Response response = askOneLine(Mode.CURRENT_DATA, PID.ECU_COMPATIBILITY);
+    if (response.isError()) {
+      return null;
+    }
+    return EcuCompatibility.parseHex(response.getData()[0]);
   }
 
 

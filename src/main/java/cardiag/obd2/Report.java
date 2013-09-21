@@ -27,6 +27,7 @@ public class Report {
   private Double fuelTrimPercentLongTerm;
   private Integer intakeAirTemperature;
   private AirStatus secondaryAirStatus;
+  private EcuCompatibility ecuCompatibility;
 
 
   public boolean[] getSupportedPIDS() {
@@ -183,6 +184,16 @@ public class Report {
 
   public void setSecondaryAirStatus(final AirStatus secondaryAirStatus) {
     this.secondaryAirStatus = secondaryAirStatus;
+  }
+
+
+  public EcuCompatibility getEcuCompatibility() {
+    return ecuCompatibility;
+  }
+
+
+  public void setEcuCompatibility(final EcuCompatibility ecuCompatibility) {
+    this.ecuCompatibility = ecuCompatibility;
   }
 
 }

@@ -35,6 +35,7 @@ public class PID {
   public static final PID AIR_TEMP_INTAKE = new PID(0x0F, FREEZE_FRAME_DATA, CURRENT_DATA);
 
   public static final PID SECONDARY_AIR_STATUS = new PID(0x12, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID ECU_COMPATIBILITY = new PID(0x1c, CURRENT_DATA);
 
   public static final PID DISTANCE_WITH_MALFUNCTION = new PID(0x21, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_LEVEL_INPUT = new PID(0x2F, FREEZE_FRAME_DATA, CURRENT_DATA);
@@ -43,6 +44,7 @@ public class PID {
 
   public static final PID FUEL_INJECTION_TIMING = new PID(0x5d, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_RATE = new PID(0x5e, FREEZE_FRAME_DATA, CURRENT_DATA);
+
 
 
 
@@ -116,6 +118,8 @@ public class PID {
         return valid(mode, AIR_TEMP_INTAKE);
       case 0x12:
         return valid(mode, SECONDARY_AIR_STATUS);
+      case 0x1C:
+        return valid(mode, ECU_COMPATIBILITY);
       case 0x21:
         return valid(mode, DISTANCE_WITH_MALFUNCTION);
       case 0x2F:
