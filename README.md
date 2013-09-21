@@ -50,6 +50,8 @@ Useful links
 - http://www.multitronics.ru/kody_obd2/
 - http://www.multitronics.ru/terminy_obd2/
 - http://www.obdii.com/obdii_library.asp
+- http://www.outilsobdfacile.com/obd-mode-pid.php
+- http://www.genisysotc.com/pdfs/DriveabilityDiagnostics.pdf
 
 Maybe useful links
 ------------------

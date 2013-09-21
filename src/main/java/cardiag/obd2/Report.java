@@ -32,6 +32,12 @@ public class Report {
   private Double catalystTemperatureSensor2;
   private Integer ambientAirTemperature;
   private Integer engineOilTemperature;
+  private Integer intakeAirTemperatureSensor;
+  private Integer exhaustGasRecirculationTemperature;
+  private Integer manifoldSurfaceTemperature;
+  private Double commandedEgr;
+  private Double egrError;
+  private Double ethanolFuel;
 
 
   public boolean[] getSupportedPIDS() {
@@ -238,6 +244,66 @@ public class Report {
 
   public void setEngineOilTemperature(final Integer engineOilTemperature) {
     this.engineOilTemperature = engineOilTemperature;
+  }
+
+
+  public Integer getIntakeAirTemperatureSensor() {
+    return intakeAirTemperatureSensor;
+  }
+
+
+  public void setIntakeAirTemperatureSensor(final Integer intakeAirTemperatureSensor) {
+    this.intakeAirTemperatureSensor = intakeAirTemperatureSensor;
+  }
+
+
+  public Integer getExhaustGasRecirculationTemperature() {
+    return exhaustGasRecirculationTemperature;
+  }
+
+
+  public void setExhaustGasRecirculationTemperature(final Integer exhaustGasRecirculationTemperature) {
+    this.exhaustGasRecirculationTemperature = exhaustGasRecirculationTemperature;
+  }
+
+
+  public Integer getManifoldSurfaceTemperature() {
+    return manifoldSurfaceTemperature;
+  }
+
+
+  public void setManifoldSurfaceTemperature(final Integer manifoldSurfaceTemperature) {
+    this.manifoldSurfaceTemperature = manifoldSurfaceTemperature;
+  }
+
+
+  public Double getCommandedEgr() {
+    return commandedEgr;
+  }
+
+
+  public void setCommandedEgr(final Double commandedEgr) {
+    this.commandedEgr = commandedEgr;
+  }
+
+
+  public Double getEgrError() {
+    return egrError;
+  }
+
+
+  public void setEgrError(final Double egrError) {
+    this.egrError = egrError;
+  }
+
+
+  public Double getEthanolFuel() {
+    return ethanolFuel;
+  }
+
+
+  public void setEthanolFuel(final Double ethanolFuel) {
+    this.ethanolFuel = ethanolFuel;
   }
 
 }

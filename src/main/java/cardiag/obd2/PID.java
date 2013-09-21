@@ -26,18 +26,21 @@ public class PID {
   public static final PID MONITOR_STATUS = new PID(1, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_STATUS = new PID(3, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID ENGINE_LOAD = new PID(4, FREEZE_FRAME_DATA, CURRENT_DATA);
-  public static final PID ENGINE_COOLANT_TEMP = new PID(5, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID ENGINE_COOLANT_TEMPERATURE = new PID(5, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_TRIM_PERCENT_SHORT_BANK1 = new PID(6, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_TRIM_PERCENT_LONG_BANK1 = new PID(7, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_TRIM_PERCENT_SHORT_BANK2 = new PID(8, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_TRIM_PERCENT_LONG_BANK2 = new PID(9, FREEZE_FRAME_DATA, CURRENT_DATA);
 
-  public static final PID AIR_TEMP_INTAKE = new PID(0x0F, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID INTAKE_AIR_TEMPERATURE = new PID(0x0F, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID INTAKE_AIR_TEMPERATURE_SENSOR = new PID(0x68, FREEZE_FRAME_DATA, CURRENT_DATA);
 
   public static final PID SECONDARY_AIR_STATUS = new PID(0x12, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID ECU_COMPATIBILITY = new PID(0x1c, CURRENT_DATA);
 
   public static final PID DISTANCE_WITH_MALFUNCTION = new PID(0x21, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID COMMANDED_EGR = new PID(0x2c, FREEZE_FRAME_DATA, CURRENT_DATA);
+  public static final PID EGR_ERROR = new PID(0x2d, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_LEVEL_INPUT = new PID(0x2F, FREEZE_FRAME_DATA, CURRENT_DATA);
 
   public static final PID DISTANCE_FROM_CODES_CLEARED = new PID(0x31, FREEZE_FRAME_DATA, CURRENT_DATA);
@@ -48,14 +51,18 @@ public class PID {
 
   public static final PID AMBIENT_AIR_TEMPERATURE = new PID(0x46, FREEZE_FRAME_DATA, CURRENT_DATA);
 
+  public static final PID ETHANOL_FUEL = new PID(0x51, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID ENGINE_OIL_TEMPERATURE = new PID(0x5c, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_INJECTION_TIMING = new PID(0x5d, FREEZE_FRAME_DATA, CURRENT_DATA);
   public static final PID FUEL_RATE = new PID(0x5e, FREEZE_FRAME_DATA, CURRENT_DATA);
 
+  public static final PID EXHAUST_GAS_RECIRCULATION_TEMPERATURE = new PID(0x6b, FREEZE_FRAME_DATA, CURRENT_DATA);
+
+  public static final PID MANIFOLD_SURFACE_TEMPERATURE = new PID(0x84, FREEZE_FRAME_DATA, CURRENT_DATA);
+
 
   private final Mode[] allowedModes;
   private final int code;
-
 
 
   protected PID(final int pidCode, final Mode... modesAllowed) {
@@ -108,7 +115,7 @@ public class PID {
       case 4:
         return valid(mode, ENGINE_LOAD);
       case 5:
-        return valid(mode, ENGINE_COOLANT_TEMP);
+        return valid(mode, ENGINE_COOLANT_TEMPERATURE);
       case 6:
         return valid(mode, FUEL_TRIM_PERCENT_SHORT_BANK1);
       case 7:
@@ -118,13 +125,17 @@ public class PID {
       case 9:
         return valid(mode, FUEL_TRIM_PERCENT_LONG_BANK2);
       case 0x0F:
-        return valid(mode, AIR_TEMP_INTAKE);
+        return valid(mode, INTAKE_AIR_TEMPERATURE);
       case 0x12:
         return valid(mode, SECONDARY_AIR_STATUS);
       case 0x1C:
         return valid(mode, ECU_COMPATIBILITY);
       case 0x21:
         return valid(mode, DISTANCE_WITH_MALFUNCTION);
+      case 0x2c:
+        return valid(mode, COMMANDED_EGR);
+      case 0x2d:
+        return valid(mode, EGR_ERROR);
       case 0x2F:
         return valid(mode, FUEL_LEVEL_INPUT);
       case 0x31:
@@ -139,12 +150,20 @@ public class PID {
         return valid(mode, CATALYST_TEMPERATURE_BANK2_SENSOR2);
       case 0x46:
         return valid(mode, AMBIENT_AIR_TEMPERATURE);
+      case 0x51:
+        return valid(mode, ETHANOL_FUEL);
       case 0x5c:
         return valid(mode, ENGINE_OIL_TEMPERATURE);
       case 0x5d:
         return valid(mode, FUEL_INJECTION_TIMING);
       case 0x5e:
         return valid(mode, FUEL_RATE);
+      case 0x68:
+        return valid(mode, INTAKE_AIR_TEMPERATURE_SENSOR);
+      case 0x6b:
+        return valid(mode, EXHAUST_GAS_RECIRCULATION_TEMPERATURE);
+      case 0x84:
+        return valid(mode, MANIFOLD_SURFACE_TEMPERATURE);
       default:
         throw new IllegalArgumentException("Invalid PID: " + hex);
     }

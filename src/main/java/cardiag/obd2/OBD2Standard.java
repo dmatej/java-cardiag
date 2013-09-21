@@ -78,26 +78,32 @@ public class OBD2Standard implements Closeable {
     report.setMonitorStatus(getMonitorStatus());
     report.setFaults(getErrorReport());
 
-    report.setAmbientAirTemperature(getAmbientAirTemperature(false));
-    report.setEngineOilTemperature(getEngineOilTemperature(false));
-
     report.setDistanceSinceErrorCodesCleared(getDistanceSinceCodesCleared(false));
     report.setDistanceWithMalfunction(getDistanceWithMalfunction(false));
 
+    report.setAmbientAirTemperature(getAmbientAirTemperature(false));
+    report.setEngineOilTemperature(getEngineOilTemperature(false));
     report.setEngineCoolantTemperature(getEngineCoolantTemperature(false));
+    report.setManifoldSurfaceTemperature(getManifoldSurfaceTemperature(false));
+
     report.setEngineLoad(getEngineLoad(false));
+    report.setExhaustGasRecirculationTemperature(getExhaustGasRecirculationTemperature(false));
     report.setFuelInjectionTiming(getFuelInjectionTiming(false));
     report.setFuelLevelInput(getFuelLevelInput(false));
     report.setFuelRate(getFuelRate(false));
     report.setFuelStatus(getFuelStatus(false));
+    report.setIntakeAirTemperature(getIntakeAirTemperature(false));
+    report.setIntakeAirTemperatureSensor(getIntakeAirTemperatureSensor(false));
+    report.setCatalystTemperatureSensor1(getCatalystTemperature(false, 2, 1));
+    report.setCatalystTemperatureSensor2(getCatalystTemperature(false, 2, 2));
     report.setSecondaryAirStatus(getSecondaryAirStatus(false));
+    report.setCommandedEgr(getCommandedEgr(false));
+    report.setEgrError(getEgrError(false));
+
     // only bank 1
     report.setFuelTrimPercentShortTerm(getFuelTrimPercent(false, false, 1));
     report.setFuelTrimPercentLongTerm(getFuelTrimPercent(false, true, 1));
-    report.setIntakeAirTemperature(getIntakeAirTemperature(false));
-
-    report.setCatalystTemperatureSensor1(getCatalystTemperature(false, 2, 1));
-    report.setCatalystTemperatureSensor2(getCatalystTemperature(false, 2, 2));
+    report.setEthanolFuel(getEthanolFuel(false));
 
     return report;
   }
@@ -207,6 +213,7 @@ public class OBD2Standard implements Closeable {
 
 
   public boolean[] getSupportedPIDs() {
+    LOG.debug("getSupportedPIDs()");
     final Response line = askOneLine(Mode.CURRENT_DATA, PID.PIDS_SUPPORTED);
     if (line.isError()) {
       return null;
@@ -216,6 +223,7 @@ public class OBD2Standard implements Closeable {
 
 
   public FuelStatus getFuelStatus(final boolean freezed) {
+    LOG.debug("getFuelStatus(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.FUEL_STATUS);
     if (line.isError()) {
       return null;
@@ -226,6 +234,7 @@ public class OBD2Standard implements Closeable {
 
 
   public EcuCompatibility getEcuCompatibility() {
+    LOG.debug("getEcuCompatibility()");
     final Response response = askOneLine(Mode.CURRENT_DATA, PID.ECU_COMPATIBILITY);
     if (response.isError()) {
       return null;
@@ -235,11 +244,13 @@ public class OBD2Standard implements Closeable {
 
 
   public void clearTroubleCodes() {
+    LOG.debug("clearTroubleCodes()");
     askOneLine(Mode.CLEAR_TROUBLE_CODES, PID.CLEAR_TROUBLE_CODES);
   }
 
 
   public MonitorStatus getMonitorStatus() {
+    LOG.debug("getMonitorStatus()");
     final Response response = askOneLine(Mode.CURRENT_DATA, PID.MONITOR_STATUS);
     if (response.isError()) {
       return null;
@@ -263,6 +274,7 @@ public class OBD2Standard implements Closeable {
 
 
   public List<Fault> getErrorReport() {
+    LOG.debug("getErrorReport()");
     final List<Response> responses = ask(Mode.DIAGNOSTIC, PID.DIAGNOSTIC_CODES);
     if (responses.isEmpty()) {
       return Collections.emptyList();
@@ -306,6 +318,7 @@ public class OBD2Standard implements Closeable {
    * @throws OBD2Exception
    */
   public Double getEngineLoad(final boolean freezed) {
+    LOG.debug("getEngineLoad(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.ENGINE_LOAD);
     if (line.isError()) {
       return null;
@@ -316,16 +329,19 @@ public class OBD2Standard implements Closeable {
 
 
   public Integer getEngineCoolantTemperature(final boolean freezed) {
-    final Response line = askOneLine(getMode(freezed), PID.ENGINE_COOLANT_TEMP);
+    LOG.debug("getEngineCoolantTemperature(freezed={})", freezed);
+    final Response line = askOneLine(getMode(freezed), PID.ENGINE_COOLANT_TEMPERATURE);
     if (line.isError()) {
       return null;
     }
+    // TODO: three bytes?!
     final int encoded = Integer.parseInt(line.getData()[0], 16);
     return encoded - 40;
   }
 
 
   public Integer getEngineOilTemperature(final boolean freezed) {
+    LOG.debug("getEngineOilTemperature(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.ENGINE_OIL_TEMPERATURE);
     if (line.isError()) {
       return null;
@@ -336,7 +352,8 @@ public class OBD2Standard implements Closeable {
 
 
   public Integer getIntakeAirTemperature(final boolean freezed) {
-    final Response line = askOneLine(getMode(freezed), PID.AIR_TEMP_INTAKE);
+    LOG.debug("getIntakeAirTemperature(freezed={})", freezed);
+    final Response line = askOneLine(getMode(freezed), PID.INTAKE_AIR_TEMPERATURE);
     if (line.isError()) {
       return null;
     }
@@ -345,7 +362,44 @@ public class OBD2Standard implements Closeable {
   }
 
 
+  public Integer getIntakeAirTemperatureSensor(final boolean freezed) {
+    LOG.debug("getIntakeAirTemperatureSensor(freezed={})", freezed);
+    final Response line = askOneLine(getMode(freezed), PID.INTAKE_AIR_TEMPERATURE_SENSOR);
+    if (line.isError()) {
+      return null;
+    }
+    // TODO: what is it?
+    final int encodedA = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedB = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedC = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedD = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedE = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedF = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedG = Integer.parseInt(line.getData()[0], 16);
+    return encodedA - 40;
+  }
+
+
+  public Integer getExhaustGasRecirculationTemperature(final boolean freezed) {
+    LOG.debug("getExhaustGasRecirculationTemperature(freezed={})", freezed);
+
+    final Response line = askOneLine(getMode(freezed), PID.EXHAUST_GAS_RECIRCULATION_TEMPERATURE);
+    if (line.isError()) {
+      return null;
+    }
+    // TODO: what is it?
+    final int encodedA = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedB = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedC = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedD = Integer.parseInt(line.getData()[0], 16);
+    // final int encodedE = Integer.parseInt(line.getData()[0], 16);
+    return encodedA - 40;
+
+  }
+
+
   public Integer getAmbientAirTemperature(final boolean freezed) {
+    LOG.debug("getAmbientAirTemperature(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.AMBIENT_AIR_TEMPERATURE);
     if (line.isError()) {
       return null;
@@ -355,7 +409,20 @@ public class OBD2Standard implements Closeable {
   }
 
 
+  public Integer getManifoldSurfaceTemperature(final boolean freezed) {
+    LOG.debug("getManifoldSurfaceTemperature(freezed={})", freezed);
+    final Response line = askOneLine(getMode(freezed), PID.MANIFOLD_SURFACE_TEMPERATURE);
+    if (line.isError()) {
+      return null;
+    }
+    // TODO: how many bytes?
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
+    return encoded - 40;
+  }
+
+
   public Double getFuelTrimPercent(final boolean freezed, final boolean longTerm, final int bank) {
+    LOG.debug("getFuelTrimPercent(freezed={}, longTerm={}, bank={})", freezed, longTerm, bank);
     final PID pid;
     if (bank == 1) {
       pid = longTerm ? PID.FUEL_TRIM_PERCENT_LONG_BANK1 : PID.FUEL_TRIM_PERCENT_SHORT_BANK1;
@@ -374,6 +441,7 @@ public class OBD2Standard implements Closeable {
 
 
   public Double getCatalystTemperature(final boolean freezed, final int bank, final int sensor) {
+    LOG.debug("getCatalystTemperature(freezed={}, bank={}, sensor={})", freezed, bank, sensor);
     final PID pid;
     if (sensor != 1 && sensor != 2) {
       throw new IllegalArgumentException("Invalid sensor: " + sensor);
@@ -405,6 +473,7 @@ public class OBD2Standard implements Closeable {
 
 
   public Integer getDistanceWithMalfunction(final boolean freezed) {
+    LOG.debug("getDistanceWithMalfunction(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.DISTANCE_WITH_MALFUNCTION);
     if (line.isError()) {
       return null;
@@ -416,6 +485,7 @@ public class OBD2Standard implements Closeable {
 
 
   public Integer getDistanceSinceCodesCleared(final boolean freezed) {
+    LOG.debug("getDistanceSinceCodesCleared(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.DISTANCE_FROM_CODES_CLEARED);
     if (line.isError()) {
       return null;
@@ -426,7 +496,19 @@ public class OBD2Standard implements Closeable {
   }
 
 
+  public Double getEthanolFuel(final boolean freezed) {
+    LOG.debug("getEthanolFuel(freezed={})", freezed);
+    final Response line = askOneLine(getMode(freezed), PID.ETHANOL_FUEL);
+    if (line.isError()) {
+      return null;
+    }
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
+    return (encoded * 100.0) / 255.0;
+  }
+
+
   public Double getFuelLevelInput(final boolean freezed) {
+    LOG.debug("getFuelLevelInput(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.FUEL_LEVEL_INPUT);
     if (line.isError()) {
       return null;
@@ -437,6 +519,7 @@ public class OBD2Standard implements Closeable {
 
 
   public Double getFuelInjectionTiming(final boolean freezed) {
+    LOG.debug("getFuelInjectionTiming(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.FUEL_INJECTION_TIMING);
     if (line.isError()) {
       return null;
@@ -448,6 +531,7 @@ public class OBD2Standard implements Closeable {
 
 
   public Double getFuelRate(final boolean freezed) {
+    LOG.debug("getFuelRate(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.FUEL_RATE);
     if (line.isError()) {
       return null;
@@ -459,10 +543,33 @@ public class OBD2Standard implements Closeable {
 
 
   public AirStatus getSecondaryAirStatus(final boolean freezed) {
+    LOG.debug("getSecondaryAirStatus(freezed={})", freezed);
     final Response line = askOneLine(getMode(freezed), PID.SECONDARY_AIR_STATUS);
     if (line.isError()) {
       return null;
     }
     return AirStatus.parseHex(line.getData()[0]);
+  }
+
+
+  public Double getCommandedEgr(final boolean freezed) {
+    LOG.debug("getCommandedEgr(freezed={})", freezed);
+    final Response line = askOneLine(getMode(freezed), PID.COMMANDED_EGR);
+    if (line.isError()) {
+      return null;
+    }
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
+    return (encoded * 100.0) / 255.0;
+  }
+
+
+  public Double getEgrError(final boolean freezed) {
+    LOG.debug("getEgrError(freezed={})", freezed);
+    final Response line = askOneLine(getMode(freezed), PID.EGR_ERROR);
+    if (line.isError()) {
+      return null;
+    }
+    final int encoded = Integer.parseInt(line.getData()[0], 16);
+    return ((encoded - 128.0) * 100.0)/128.0;
   }
 }

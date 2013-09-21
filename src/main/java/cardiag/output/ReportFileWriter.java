@@ -67,8 +67,12 @@ public class ReportFileWriter {
     writer.writeData("Engine coolant temperature", report.getEngineCoolantTemperature(), DEGREES_OF_CENTIGRADE);
     writer.writeData("Engine oil temperature", report.getEngineOilTemperature(), DEGREES_OF_CENTIGRADE);
     writer.writeData("Intake air temperature", report.getIntakeAirTemperature(), DEGREES_OF_CENTIGRADE);
+    writer.writeData("Intake air temperature sensor", report.getIntakeAirTemperatureSensor(), DEGREES_OF_CENTIGRADE);
     writer.writeData("Catalyst temperature - sensor1", report.getCatalystTemperatureSensor1(), DEGREES_OF_CENTIGRADE);
     writer.writeData("Catalyst temperature - sensor2", report.getCatalystTemperatureSensor2(), DEGREES_OF_CENTIGRADE);
+    writer.writeData("Exhaust gas recirculation temperature", report.getExhaustGasRecirculationTemperature(),
+        DEGREES_OF_CENTIGRADE);
+    writer.writeData("Manifold surface temperature", report.getManifoldSurfaceTemperature(), DEGREES_OF_CENTIGRADE);
 
     writer.writeHeader("Engine timing and fuel");
     writer.writeData("Engine load", report.getEngineLoad(), PERCENTS);
@@ -79,6 +83,10 @@ public class ReportFileWriter {
     writer.writeData("Fuel level input", report.getFuelLevelInput(), PERCENTS);
     writer.writeData("Fuel trim pecent in long term", report.getFuelTrimPercentLongTerm(), PERCENTS);
     writer.writeData("Fuel trim pecent in short term", report.getFuelTrimPercentShortTerm(), PERCENTS);
+    writer.writeData("Commanded EGR", report.getCommandedEgr(), PERCENTS);
+    writer.writeData("EGR error", report.getEgrError(), PERCENTS);
+    writer.writeData("Ethanol fuel", report.getEthanolFuel(), PERCENTS);
+
     // writer.writeData("", report.get, "");
   }
 }
