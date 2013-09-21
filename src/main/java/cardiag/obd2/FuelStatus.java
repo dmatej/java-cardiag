@@ -46,7 +46,7 @@ public enum FuelStatus {
    */
   @Override
   public String toString() {
-    return this.value + ": " + this.description;
+    return this.description;
   }
 
 
