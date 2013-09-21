@@ -34,7 +34,11 @@ public class Report {
 
 
   public void setSupportedPIDS(boolean[] supportedPIDS) {
-    this.supportedPIDS = Arrays.copyOf(supportedPIDS, supportedPIDS.length);
+    if (supportedPIDS == null) {
+      this.supportedPIDS = null;
+    } else {
+      this.supportedPIDS = Arrays.copyOf(supportedPIDS, supportedPIDS.length);
+    }
   }
 
 
@@ -164,6 +168,9 @@ public class Report {
 
 
   public List<Fault> getFaults() {
+    if (this.faults == null) {
+      return null;
+    }
     return Collections.unmodifiableList(this.faults);
   }
 

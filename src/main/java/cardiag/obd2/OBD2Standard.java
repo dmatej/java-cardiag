@@ -121,7 +121,11 @@ public class OBD2Standard implements Closeable {
     final List<Response> responses = new ArrayList<Response>(lines.size());
     for (final String line : lines) {
       final String[] vals = line.split(" ");
-      if ("7F".equals(vals[0])) {
+      final String firstWord = vals[0];
+      if (firstWord.length() != 2) {
+        throw new PortCommunicationException("Invalid response: " + lines);
+      }
+      if ("7F".equals(firstWord)) {
         LOG.warn("Error response: " + line);
         final Response response = new Response(true, mode, pid, vals);
         responses.add(response);
