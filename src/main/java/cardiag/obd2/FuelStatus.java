@@ -25,6 +25,31 @@ public enum FuelStatus {
   }
 
 
+  /**
+   * @return the code.
+   */
+  public int getCode() {
+    return value;
+  }
+
+
+  /**
+   * @return the description.
+   */
+  public String getDescription() {
+    return description;
+  }
+
+
+  /**
+   * @return code and description
+   */
+  @Override
+  public String toString() {
+    return this.value + ": " + this.description;
+  }
+
+
   public static FuelStatus parseHex(final String hex) {
     if (hex == null) {
       throw new IllegalArgumentException("Invalid hex code: " + hex);
