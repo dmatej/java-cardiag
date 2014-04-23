@@ -136,6 +136,11 @@ public class OBD2Standard implements Closeable {
     final List<String> lines = comm.readResponse();
     final List<Response> responses = new ArrayList<Response>(lines.size());
     for (final String line : lines) {
+      // Ford Focus 1.4
+      if ("NO DATA".equals(line)) {
+        responses.add(new ResponseWithNoData(mode, pid));
+        return responses;
+      }
       final String[] vals = line.split(" ");
       final String firstWord = vals[0];
       if (firstWord.length() != 2) {
@@ -180,9 +185,6 @@ public class OBD2Standard implements Closeable {
   protected Response askOneLine(final Mode mode, final PID pid, final String... hexParams) {
     LOG.trace("askOneLine(mode={}, pid={}, hexParams={})", mode, pid, hexParams);
     final List<Response> responses = ask(mode, pid, hexParams);
-    if (responses.isEmpty()) {
-      return null;
-    }
     if (responses.size() > 1) {
       // bug or something weird.
       throw new IllegalStateException("Too many responses for this command: "
@@ -283,6 +285,9 @@ public class OBD2Standard implements Closeable {
       return null;
     }
     final List<Fault> faults = new ArrayList<Fault>();
+    if (responses.get(0) instanceof ResponseWithNoData) {
+      return faults;
+    }
     for (final Response response : responses) {
       final String[] data = response.getData();
       final boolean[] a1 = SerialUtils.convertHexToBooleanArray(data[0]);

@@ -27,7 +27,7 @@ public class Response {
   public Response(final boolean error, final Mode mode, final PID pid, final String... data) {
     this.mode = mode;
     this.pid = pid;
-    this.data = data;
+    this.data = data == null ? new String[1] : data;
     this.error = error;
   }
 
