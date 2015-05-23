@@ -52,7 +52,7 @@ public class Main {
     final OBD2Standard obd2 = new OBD2Standard(cfg);
     try {
       if (action == Action.REPORT) {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_hhmmss.SSS");
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmss.SSS");
         if (!homeDir.exists()) {
           homeDir.mkdirs();
         }
