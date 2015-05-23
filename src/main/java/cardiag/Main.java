@@ -47,12 +47,16 @@ public class Main {
     final PortConfiguration cfg = user.readPortConfiguration(portNames);
 
     final Action action = parseAction(args);
+    final File homeDir = parseHomeDir(args);
 
     final OBD2Standard obd2 = new OBD2Standard(cfg);
     try {
       if (action == Action.REPORT) {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_hhmmss.SSS");
-        final File file = new File("report" + sdf.format(new Date()) + ".txt");
+        if (!homeDir.exists()) {
+          homeDir.mkdirs();
+        }
+        final File file = new File(homeDir, "report" + sdf.format(new Date()) + ".txt");
         final Report report = obd2.createReport();
         final ReportFileWriter writer = new ReportFileWriter(file);
         writer.write(report);
@@ -75,5 +79,15 @@ public class Main {
       return Action.REPORT;
     }
     return Action.parse(args[0]);
+  }
+
+
+  private static File parseHomeDir(final String... args) {
+    LOG.trace("parseHomeDir(args={})", (Object[]) args);
+
+    if (args == null || args.length < 2) {
+      return new File(System.getProperty("java.io.tmpdir") + File.pathSeparator + "java-cardiag");
+    }
+    return new File(args[1]);
   }
 }
