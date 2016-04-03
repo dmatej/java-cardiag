@@ -10,6 +10,7 @@ package cardiag.user;
 public enum Action {
 
   REPORT,
+  WATCH,
   CLEAR_TROUBLE_CODES;
 
 

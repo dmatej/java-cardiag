@@ -51,23 +51,31 @@ public class Main {
 
     final OBD2Standard obd2 = new OBD2Standard(cfg);
     try {
-      if (action == Action.REPORT) {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmss.SSS");
-        if (!homeDir.exists()) {
-          homeDir.mkdirs();
-        }
-        final File file = new File(homeDir, "report" + sdf.format(new Date()) + ".txt");
-        final Report report = obd2.createReport();
-        final ReportFileWriter writer = new ReportFileWriter(file);
-        writer.write(report);
+      if (action == Action.WATCH) {
+        watch(obd2, homeDir, 1000);
+      } else if (action == Action.REPORT) {
+        watch(obd2, homeDir, 1);
       } else if (action == Action.CLEAR_TROUBLE_CODES) {
         obd2.clearTroubleCodes();
       }
-
-      // TODO: while(true) cycle to read user commands, run them and to process responses until user
-      // calls exit.
     } finally {
       obd2.close();
+    }
+  }
+
+
+  private static void watch(final OBD2Standard obd2, final File homeDir, final int iterations) {
+    LOG.info("watch(obd2={}, homeDir={}, iterations={})", obd2, homeDir, iterations);
+    final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmss.SSS");
+    if (!homeDir.exists()) {
+      homeDir.mkdirs();
+    }
+    final File file = new File(homeDir, "report" + sdf.format(new Date()) + ".txt");
+    final ReportFileWriter writer = new ReportFileWriter(file);
+    int i = iterations;
+    while (i-- > 0) {
+      final Report report = obd2.createReport();
+      writer.write(report);
     }
   }
 

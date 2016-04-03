@@ -42,7 +42,7 @@ public class OutputFileWriter implements Closeable {
 
     FileOutputStream stream = null;
     try {
-      stream = new FileOutputStream(file);
+      stream = new FileOutputStream(file, true);
       return new OutputStreamWriter(stream, Charset.forName("UTF-8"));
     } catch (final IOException e) {
       IOUtils.closeQuietly(stream);
