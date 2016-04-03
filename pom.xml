@@ -169,13 +169,11 @@
   </build>
 
   <dependencies>
-    <!-- hoping in this implementation ... -->
     <dependency>
-      <groupId>net.jssc</groupId>
+      <groupId>org.scream3r</groupId>
       <artifactId>jssc</artifactId>
-      <version>0.9.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/src/lib/jssc.jar</systemPath>
+      <version>2.8.0</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
