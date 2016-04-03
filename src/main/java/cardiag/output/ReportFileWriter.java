@@ -4,6 +4,7 @@
 package cardiag.output;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -53,6 +54,9 @@ public class ReportFileWriter {
     LOG.trace("write(writer, report)");
 
     writer.writeHeader("Basic info");
+
+    final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy, HH:mm:ss.SSS");
+    writer.writeData("Time:", sdf.format(report.getTimestamp()), null);
     writer.writeData("ECU compatibility", report.getEcuCompatibility(), null);
     writer.writeData("Supported PIDs", report.getSupportedPIDS(), null);
     writer.writeData("Monitor status", report.getMonitorStatus(), null);

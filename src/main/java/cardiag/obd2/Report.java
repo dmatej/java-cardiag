@@ -5,6 +5,7 @@ package cardiag.obd2;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -12,6 +13,7 @@ import java.util.List;
  */
 public class Report {
 
+  private Date timestamp = new Date();
   private boolean[] supportedPIDS;
   private MonitorStatus monitorStatus;
   private List<Fault> faults;
@@ -39,6 +41,10 @@ public class Report {
   private Double egrError;
   private Double ethanolFuel;
 
+
+  public Date getTimestamp() {
+    return timestamp;
+  }
 
   public boolean[] getSupportedPIDS() {
     return Arrays.copyOf(supportedPIDS, supportedPIDS.length);
