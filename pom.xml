@@ -23,8 +23,8 @@
     <mainClass>cardiag.Main</mainClass>
     <run.srcDir>src/main/run</run.srcDir>
     <encoding>UTF-8</encoding>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.fork>true</maven.compiler.fork>
 
     <cardiag.test.serialPort>/dev/ttyUSB0</cardiag.test.serialPort>
