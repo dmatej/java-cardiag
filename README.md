@@ -32,6 +32,12 @@ Problems
 - only few available cars for testing - Lada Kalina 1.6 8V 2007, Škoda Fabia 2010, Ford Focus 2007.
 - need help with a selection of the license ... GNU GPL v3? EPL? BSD?
 
+Troubleshooting
+---------------
+Port name - /dev/ttyUSB0; Method name - openPort(); Exception type - Permission denied. (Linux)
+- sudo gpasswd --add ${USER} dialout
+- or run the program with sudo.
+
 Current stage
 -------------
 - early development.
