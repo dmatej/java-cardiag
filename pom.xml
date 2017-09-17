@@ -12,13 +12,6 @@
     <url>https://github.com/dmatej/java-cardiag.git</url>
   </scm>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>onejar-maven-plugin.googlecode.com</id>
-      <url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <properties>
     <mainClass>cardiag.Main</mainClass>
     <run.srcDir>src/main/run</run.srcDir>
