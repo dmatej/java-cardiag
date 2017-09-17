@@ -94,7 +94,8 @@ public class Main {
     LOG.trace("parseHomeDir(args={})", (Object[]) args);
 
     if (args == null || args.length < 2) {
-      return new File(System.getProperty("java.io.tmpdir"), "java-cardiag");
+      final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+      return new File(tmpDir, "java-cardiag");
     }
     return new File(args[1]);
   }
