@@ -11,7 +11,7 @@ import java.util.List;
 import jssc.SerialPort;
 import jssc.SerialPortException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
