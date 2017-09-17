@@ -3,7 +3,10 @@
  */
 package cardiag.obd2;
 
-import static cardiag.obd2.Mode.*;
+import static cardiag.obd2.Mode.CURRENT_DATA;
+import static cardiag.obd2.Mode.DIAGNOSTIC;
+import static cardiag.obd2.Mode.FREEZE_FRAME_DATA;
+import static cardiag.obd2.Mode.VEHICLE_INFO;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;

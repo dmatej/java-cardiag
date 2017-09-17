@@ -53,7 +53,7 @@ public class Report {
 
   public void setSupportedPIDS(final boolean[] supportedPIDS) {
     if (supportedPIDS == null) {
-      this.supportedPIDS = null;
+      this.supportedPIDS = new boolean[0];
     } else {
       this.supportedPIDS = Arrays.copyOf(supportedPIDS, supportedPIDS.length);
     }

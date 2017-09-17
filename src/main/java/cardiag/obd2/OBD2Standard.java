@@ -134,44 +134,53 @@ public class OBD2Standard implements Closeable {
       }
     }
     comm.writeln(params);
-    final List<String> lines = comm.readResponse();
-    final List<Response> responses = new ArrayList<Response>(lines.size());
-    for (final String line : lines) {
-      // Ford Focus 1.4
-      if ("NO DATA".equals(line)) {
-        responses.add(new ResponseWithNoData(mode, pid));
-        return responses;
-      }
-      final String[] vals = line.split(" ");
-      final String firstWord = vals[0];
-      if (firstWord.length() != 2) {
-        throw new PortCommunicationException("Invalid response: " + lines);
-      }
-      if ("7F".equals(firstWord)) {
-        LOG.warn("Error response: " + line);
-        final Response response = new Response(true, mode, pid, vals);
-        responses.add(response);
-        return responses;
-      }
-      final String[] data;
-      final PID responsePID;
-      final int dataOffset;
-      if (mode == Mode.DIAGNOSTIC || mode == Mode.CLEAR_TROUBLE_CODES) {
-        dataOffset = 1;
-        responsePID = null;
-      } else {
-        dataOffset = 2;
-        responsePID = PID.parseHex(vals[1], mode);
-      }
-      if (vals.length > dataOffset) {
-        data = Arrays.copyOfRange(vals, dataOffset, vals.length);
-      } else {
-        data = null;
-      }
-      final Response response = new Response(false, mode, responsePID, data);
-      responses.add(response);
+    final String responseString = removeIgnoredText(comm.readResponse(StringUtils.join(params)));
+    final List<Response> responses = new ArrayList<>();
+    // Ford Focus 1.4
+    if ("NO DATA".equals(responseString)) {
+      responses.add(new ResponseWithNoData(mode, pid));
+      return responses;
     }
+    final String[] vals = responseString.split(" ");
+    LOG.trace("vals: \n  {}", Arrays.toString(vals));
+    final String firstWord = vals[0];
+    if (firstWord.length() != 2) {
+      throw new PortCommunicationException("Invalid response: '" + responseString + "'");
+    }
+    if ("7F".equals(firstWord)) {
+      LOG.warn("Error response: '" + responseString + "'");
+      final Response response = new Response(true, mode, pid, vals);
+      responses.add(response);
+      return responses;
+    }
+    final String[] data;
+    final PID responsePID;
+    final int dataOffset;
+    if (mode == Mode.DIAGNOSTIC || mode == Mode.CLEAR_TROUBLE_CODES) {
+      dataOffset = 1;
+      responsePID = null;
+    } else {
+      dataOffset = 2;
+      responsePID = PID.parseHex(vals[1], mode);
+    }
+    if (vals.length > dataOffset) {
+      data = Arrays.copyOfRange(vals, dataOffset, vals.length);
+    } else {
+      data = null;
+    }
+    final Response response = new Response(false, mode, responsePID, data);
+    responses.add(response);
     return responses;
+  }
+
+
+  private String removeIgnoredText(final String responseString) {
+    LOG.trace("removeIgnoredText(responseString={})", responseString);
+    final String fixed = StringUtils.removeIgnoreCase(responseString, "SEARCHING...");
+    if (fixed.length() != responseString.length()) {
+      LOG.warn("Removed ignored text from the response: '{}'. Result: '{}'", responseString, fixed);
+    }
+    return fixed;
   }
 
 
@@ -188,15 +197,15 @@ public class OBD2Standard implements Closeable {
     final List<Response> responses = ask(mode, pid, hexParams);
     if (responses.size() > 1) {
       // bug or something weird.
-      throw new IllegalStateException("Too many responses for this command: "
-          + ReflectionToStringBuilder.toString(responses));
+      throw new IllegalStateException(
+          "Too many responses for this command: " + ReflectionToStringBuilder.toString(responses));
     }
     final Response response = responses.get(0);
     return response;
   }
 
 
-  private Mode getMode(boolean freezed) {
+  private Mode getMode(final boolean freezed) {
     return freezed ? Mode.FREEZE_FRAME_DATA : Mode.CURRENT_DATA;
   }
 
@@ -576,6 +585,6 @@ public class OBD2Standard implements Closeable {
       return null;
     }
     final int encoded = Integer.parseInt(line.getData()[0], 16);
-    return ((encoded - 128.0) * 100.0)/128.0;
+    return ((encoded - 128.0) * 100.0) / 128.0;
   }
 }

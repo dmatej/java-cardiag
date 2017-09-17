@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import jssc.SerialPort;
-import jssc.SerialPortException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jssc.SerialPort;
+import jssc.SerialPortException;
 
 /**
  * Communication with the serial port device.
@@ -48,7 +48,7 @@ public class PortCommunication implements Closeable {
       if (!this.port.setParams(38400, 8, 1, 0, true, true)) {
         throw new PortCommunicationException("Setting parameters was unsuccessful!");
       }
-    } catch (SerialPortException e) {
+    } catch (final SerialPortException e) {
       throw new PortCommunicationException(e);
     }
   }
@@ -58,49 +58,62 @@ public class PortCommunication implements Closeable {
    * Reads responses line by line from the buffer until {@value #RESPONSE_TERMINALCHAR} comes or
    * timeout occurs.
    *
-   * @return a list of lines in response, never null and never empty list.
+   * @return a response, never null and never empty.
    * @throws PortCommunicationException - if there was no response or prompt was missing.
    */
-  public List<String> readResponse() throws PortCommunicationException {
-    LOG.trace("readResponse()");
+  public String readResponse(final String request) throws PortCommunicationException {
+    LOG.debug("readResponse(request={})", request);
 
     try {
-      final StringBuilder buffer = new StringBuilder(256);
-      final long start = System.currentTimeMillis();
-      final long timeout = cfg.getCommandTimeout();
-      while (true) {
-        if (start + timeout < System.currentTimeMillis()) {
-          throw new PortCommunicationException(String.format("Timeout %dms occured.", timeout));
-        }
-        if (this.port.getInputBufferBytesCount() == 0) {
-          Thread.yield();
-          continue;
-        }
-        final String string = this.port.readString();
-        LOG.trace("response string={}", string);
-        buffer.append(string).append('\r');
-        if (StringUtils.endsWith(string, RESPONSE_TERMINALCHAR)) {
-          buffer.setLength(buffer.length() - 2);
-          break;
-        }
-      }
-      final String response = buffer.toString();
-      if (response == null || response.trim().isEmpty()) {
+      final String response = readAll(request);
+      LOG.debug("Received response: {}", response);
+      if (response == null) {
         throw new PortCommunicationException("Retrieved no response from the port.");
       }
-      final String[] lines = StringUtils.split(response, '\r');
-      final List<String> responses = new ArrayList<String>(lines.length);
-      for (String line : lines) {
-        final String trimmed = StringUtils.trimToNull(line);
-        if (trimmed != null) {
-          responses.add(trimmed);
-        }
-      }
-
-      LOG.info("Received response: {}", responses);
-      return responses;
-    } catch (SerialPortException e) {
+      return response;
+    } catch (final SerialPortException e) {
       throw new PortCommunicationException(e);
+    }
+  }
+
+
+  private String readAll(final String request) throws SerialPortException {
+    LOG.trace("readAll(request={})", request);
+    final StringBuilder buffer = new StringBuilder(256);
+    final long start = System.currentTimeMillis();
+    final long timeout = cfg.getCommandTimeout();
+    while (true) {
+      if (start + timeout < System.currentTimeMillis()) {
+        throw new PortCommunicationException(String.format("Timeout %d ms occured.", timeout));
+      }
+      if (this.port.getInputBufferBytesCount() == 0) {
+        Thread.yield();
+        continue;
+      }
+      final String string = StringUtils.trimToNull(this.port.readString());
+      LOG.trace("response string={}", string);
+      if (string == null) {
+        sleep(100L);
+        continue;
+      }
+      buffer.append(string);
+      if (StringUtils.endsWith(string, RESPONSE_TERMINALCHAR)) {
+        LOG.trace("Response terminated with the character {}. Character deleted.", RESPONSE_TERMINALCHAR);
+        buffer.setLength(buffer.length() - 1);
+        if (buffer.indexOf(request) == 0) {
+          buffer.replace(0, request.length(), "");
+        }
+        return buffer.toString().trim();
+      }
+    }
+  }
+
+
+  private void sleep(final long timeInMillis) {
+    try {
+      Thread.sleep(100L);
+    } catch (final InterruptedException e) {
+      LOG.warn("Interrupted.");
     }
   }
 
@@ -111,14 +124,14 @@ public class PortCommunication implements Closeable {
    * @param command - command and it's arguments.
    * @throws PortCommunicationException
    */
-  public void writeln(String... command) throws PortCommunicationException {
+  public void writeln(final String... command) throws PortCommunicationException {
     LOG.debug("writeln(command={})", Arrays.toString(command));
     try {
-      for (String commandPart : command) {
+      for (final String commandPart : command) {
         this.port.writeString(commandPart);
       }
       this.port.writeString("\r\n");
-    } catch (SerialPortException e) {
+    } catch (final SerialPortException e) {
       throw new PortCommunicationException(e);
     }
   }
@@ -137,18 +150,18 @@ public class PortCommunication implements Closeable {
 
   /**
    * Checks for OK in port response.
+   * @param request
    *
    * @throws PortCommunicationException
    */
-  protected void checkOkResponse() throws PortCommunicationException {
-    LOG.trace("checkOkResponse()");
-    final List<String> response = readResponse();
+  protected void checkOkResponse(final String request) throws PortCommunicationException {
+    LOG.trace("checkOkResponse(request={})", request);
+    final String response = readResponse(request);
     if (response == null || response.isEmpty()) {
       throw new PortCommunicationException("No response.");
     }
-    final int resultCodeIndex = response.size() - 1;
-    if (!RESPONSE_OK.equalsIgnoreCase(response.get(resultCodeIndex))) {
-      throw new PortCommunicationException("Command unsuccessful! Response: " + response);
+    if (!RESPONSE_OK.equalsIgnoreCase(response)) {
+      throw new PortCommunicationException("Command unsuccessful! Response: '" + response + "'");
     }
   }
 
@@ -163,7 +176,7 @@ public class PortCommunication implements Closeable {
   public String at(final String command) throws PortCommunicationException {
     LOG.info("at(command={})", command);
     writeln("AT", command);
-    return readResponse().get(0);
+    return readResponse("AT".concat(command));
   }
 
 
@@ -175,8 +188,9 @@ public class PortCommunication implements Closeable {
    */
   public void setEcho(final boolean on) throws PortCommunicationException {
     LOG.debug("setEcho(on={})", on);
-    writeln("ATE", translate(on));
-    checkOkResponse();
+    final String onTranslated = translate(on);
+    writeln("ATE", onTranslated);
+    checkOkResponse("ATE".concat(onTranslated));
   }
 
 
@@ -188,8 +202,9 @@ public class PortCommunication implements Closeable {
    */
   public void setLineTermination(final boolean on) throws PortCommunicationException {
     LOG.debug("setLineTermination(on={})", on);
-    writeln("ATL", translate(on));
-    checkOkResponse();
+    final String onTranslated = translate(on);
+    writeln("ATL", onTranslated);
+    checkOkResponse("ATL".concat(onTranslated));
   }
 
 
@@ -216,7 +231,7 @@ public class PortCommunication implements Closeable {
   public void close() {
     try {
       this.port.closePort();
-    } catch (SerialPortException e) {
+    } catch (final SerialPortException e) {
       throw new IllegalStateException("Cannot close the port.", e);
     }
   }
