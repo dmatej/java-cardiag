@@ -141,7 +141,8 @@ public class OBD2Standard implements Closeable {
       responses.add(new ResponseWithNoData(mode, pid));
       return responses;
     }
-    final String[] vals = responseString.split(" ");
+
+    final String[] vals = split(responseString);
     LOG.trace("vals: \n  {}", Arrays.toString(vals));
     final String firstWord = vals[0];
     if (firstWord.length() != 2) {
@@ -171,6 +172,26 @@ public class OBD2Standard implements Closeable {
     final Response response = new Response(false, mode, responsePID, data);
     responses.add(response);
     return responses;
+  }
+
+
+  private String[] split(final String responseString) {
+    final ArrayList<String> response = new ArrayList<>();
+    Character first = null;
+    for (int i = 0; i < responseString.length(); i++) {
+      final char c = responseString.charAt(i);
+      if (Character.isWhitespace(c)) {
+        continue;
+      }
+      if (first == null) {
+        first = Character.valueOf(c);
+      } else {
+        response.add(StringUtils.join(first, c));
+        first = null;
+      }
+
+    }
+    return response.toArray(new String[response.size()]);
   }
 
 
