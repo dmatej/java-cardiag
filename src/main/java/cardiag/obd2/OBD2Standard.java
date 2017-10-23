@@ -584,7 +584,13 @@ public class OBD2Standard implements Closeable {
     if (line.isError()) {
       return null;
     }
-    return AirStatus.parseHex(line.getData()[0]);
+    try {
+      return AirStatus.parseHex(line.getData()[0]);
+    } catch (final IllegalArgumentException e) {
+      // see Issue #11
+      LOG.warn(e.getMessage());
+      return null;
+    }
   }
 
 
