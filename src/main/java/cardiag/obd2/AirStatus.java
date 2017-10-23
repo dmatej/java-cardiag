@@ -8,11 +8,13 @@ package cardiag.obd2;
  */
 public enum AirStatus {
   /***/
-  UPSTREAM(0x00, "Upstream of catalytic converter"),
+  UPSTREAM(0x01, "Upstream of catalytic converter"),
   /***/
-  DOWNSTREAM(0x01, "Downstream of catalytic converter"),
+  DOWNSTREAM(0x02, "Downstream of catalytic converter"),
   /***/
-  OFF_OR_OUTSIDE(0x02, "From the outside atmosphere or off");
+  OFF_OR_OUTSIDE(0x04, "From the outside atmosphere or off"),
+  /***/
+  PUMP_COMMANDED_ON_FOR_DIAGNOSTIC(0x08, "Pump commanded on for diagnostics");
 
   final int code;
   final String description;
@@ -63,5 +65,4 @@ public enum AirStatus {
 
     throw new IllegalArgumentException("Unknown status: " + hex);
   }
-
 }
