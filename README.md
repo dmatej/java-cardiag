@@ -12,8 +12,8 @@ Example
 - report creates a text file in the current directory containing all implemented values.
 - clear_trouble_codes erases the saved errors.
 
-java -jar ./java-cardiag-0.0.1-SNAPSHOT.one-jar.jar report
-java -jar ./java-cardiag-0.0.1-SNAPSHOT.one-jar.jar CLEAR_TROUBLE_CODES
+sudo java -jar ./java-cardiag-0.0.1-SNAPSHOT-jar-with-dependencies.jar report
+sudo java -jar ./java-cardiag-0.0.1-SNAPSHOT-jar-with-dependencies.jar CLEAR_TROUBLE_CODES
 
 Targets
 -------
@@ -29,8 +29,8 @@ Problems
 ---------
 - how
 - only available hardware for testing - ELM327 clone (1.5a)
-- only few available cars for testing - Lada Kalina 1.6 8V 2007, Škoda Fabia 2010, Ford Focus 2007.
-- need help with a selection of the license ... GNU GPL v3? EPL? BSD?
+- only few available cars for testing - Lada Kalina 1.6 8V 2007, Škoda Fabia 2010, Ford Focus 2007, Seat Ibiza 2001.
+- need help with a selection of the license ... GNU GPL v3? EPL? BSD? MIT?
 
 Troubleshooting
 ---------------
@@ -43,7 +43,7 @@ Current stage
 - early development.
 - can reset error codes
 - can produce a report file with the current values
-- version 0.0.1 will be released after I will fix my problem with my car (P300, P303, P304) ;)
+- version 0.0.1 will be released after I will fix my problem with my car (P300, P303, P304) ... or later, in 2017 ;)
 - if someone will start implementing GUI, many people will be finally happy ;)
 
 Useful links
