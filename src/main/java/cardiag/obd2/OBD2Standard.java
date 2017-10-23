@@ -149,7 +149,7 @@ public class OBD2Standard implements Closeable {
       throw new PortCommunicationException("Invalid response: '" + responseString + "'");
     }
     if ("7F".equals(firstWord)) {
-      LOG.warn("Error response: '" + responseString + "'");
+      LOG.warn("Error response: '{}'", responseString);
       final Response response = new Response(true, mode, pid, vals);
       responses.add(response);
       return responses;
