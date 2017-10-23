@@ -13,6 +13,7 @@ Example
 - clear_trouble_codes erases the saved errors.
 
 sudo java -jar ./java-cardiag-0.0.1-SNAPSHOT-jar-with-dependencies.jar report
+
 sudo java -jar ./java-cardiag-0.0.1-SNAPSHOT-jar-with-dependencies.jar CLEAR_TROUBLE_CODES
 
 Targets
